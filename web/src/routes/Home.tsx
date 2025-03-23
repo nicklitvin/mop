@@ -6,7 +6,6 @@ export function Home() {
     const [data, setData] = useState<string>();
 
     const hi = async () => {
-        console.log("hh")
         const response = await callAPI<string>({
             method: "GET",
             url: "/hi"

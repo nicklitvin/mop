@@ -7,6 +7,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL
+})
 
 export type URL = "/hi";
 
@@ -18,8 +21,8 @@ export const callAPI = async <T>({ method, url, payload } : {
 }) : Promise<T|null> => {
     try {
         const response = method === "GET" ?
-            await axios.get(url, { params : payload }) :
-            await axios.post(url, payload);
+            await api.get(url, { params : payload }) :
+            await api.post(url, payload);
         const output : APIOutput<T> = response.data;
         
         return output.data ?? null;

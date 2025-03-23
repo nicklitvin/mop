@@ -8,10 +8,6 @@ config()
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-//   server: {
-//     port: Number(process.env.PORT),
-//     host: process.env.HOST
-//   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

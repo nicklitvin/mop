@@ -5,3 +5,6 @@ web/node_modules/
 # Environment variables
 server/.env
 web/.env
+
+# Builds
+web/dist
