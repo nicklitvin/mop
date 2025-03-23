@@ -1,0 +1,7 @@
+# Dependencies
+server/node_modules/
+web/node_modules/
+
+# Environment variables
+server/.env
+web/.env

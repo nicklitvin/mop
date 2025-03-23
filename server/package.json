@@ -1,0 +1,25 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "tsx ./main.ts",
+    "db": "npx prisma db push",
+    "test": "vitest --maxConcurrency 1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.11",
+    "@types/yargs": "^17.0.33",
+    "vitest": "^3.0.9"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "prisma": "^6.5.0",
+    "tsx": "^4.19.3",
+    "yargs": "^17.7.2"
+  }
+}
