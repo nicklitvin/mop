@@ -7,6 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-    id  String  @id
+model MOP {
+    id               Int       @id @default(autoincrement())
+    title            String
+    description      String
+    prerequisites    String[]
+
+    dateCreated      DateTime  @default(now())
+    version          Int       @default(1)
+    steps            Step[]
+}
+
+model Step {
+    id               Int    @id @default(autoincrement())
+    stepNumber       Int
+    mopId            Int
+    mop              MOP    @relation(fields: [mopId], references: [id])
+
+    action           String
 }

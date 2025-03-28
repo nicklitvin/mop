@@ -6,7 +6,8 @@ import path from "path";
 export class Server {
     private api : API;
     private readonly URLS = {
-        hi: "/api/hi"
+        hi: "/api/hi",
+        createPrompt: "/api/createPrompt",
     }
 
     constructor({ useBuild } : {
@@ -31,11 +32,24 @@ export class Server {
         }
 
         app.get(this.URLS.hi, this.hi.bind(this));
+        app.post(this.URLS.createPrompt, this.createMOP.bind(this));
     }
 
     async hi(req : Request, res : Response) {
         try {
             const out = await this.api.hi();
+            return res.status(out.message ? 400 : 200).json(out);
+        } catch (err) {
+            return res.status(500).json(err);
+        }
+    }
+
+    async createMOP(req : Request, res : Response) {
+        try {
+            if (!req.body || !req.body.prompt) {
+                return res.status(400).json({ message: "Prompt is required" });
+            }
+            const out = await this.api.createMOP(req.body);
             return res.status(out.message ? 400 : 200).json(out);
         } catch (err) {
             return res.status(500).json(err);
