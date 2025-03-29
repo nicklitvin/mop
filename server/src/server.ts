@@ -8,6 +8,7 @@ export class Server {
     private readonly URLS = {
         hi: "/api/hi",
         createMOP: "/api/createMOP", // Updated URL
+        getMOP: "/api/getMOP", // New URL
     };
 
     constructor({ useBuild, useMock }: { useBuild: boolean; useMock: boolean }) {
@@ -32,6 +33,7 @@ export class Server {
 
         app.get(this.URLS.hi, this.hi.bind(this));
         app.post(this.URLS.createMOP, this.createMOP.bind(this)); // Updated URL usage
+        app.get(this.URLS.getMOP, this.getMOP.bind(this)); // Add new endpoint
     }
 
     async hi(req: Request, res: Response) {
@@ -51,6 +53,19 @@ export class Server {
 
             const out = await this.api.createMOP(req.body.prompt); 
             return res.status(out.message ? 400 : 200).json(out);
+        } catch (err) {
+            return res.status(500).json(err);
+        }
+    }
+
+    async getMOP(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.query.id as string, 10); // Parse id as a number
+            if (isNaN(id)) {
+                return res.status(400).json({ message: "ID must be a number" });
+            }
+            const mop = await this.api.getMOP(id);
+            return res.status(200).json(mop);
         } catch (err) {
             return res.status(500).json(err);
         }

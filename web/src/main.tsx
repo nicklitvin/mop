@@ -3,6 +3,7 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Layout } from './routes/Layout'
 import { Home } from './routes/Home'
+import { Prompt } from './routes/Prompt';
 
 export const router = createBrowserRouter([
     {
@@ -14,11 +15,14 @@ export const router = createBrowserRouter([
                     {
                         path: "/",
                         element: <Home />
+                    },
+                    {
+                        path: "/prompt",
+                        element: <Prompt />
                     }
                 ]
             }
         ]
-
     }
 ])
 

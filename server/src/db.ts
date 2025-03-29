@@ -30,4 +30,11 @@ export class DB {
             },
         });
     }
+
+    async getMOP(id: number) { // Change id to number
+        return await this.prisma.mOP.findUnique({
+            where: { id },
+            include: { steps: true },
+        });
+    }
 }

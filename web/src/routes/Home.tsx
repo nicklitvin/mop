@@ -1,68 +1,63 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { callAPI } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MOP, Step } from "../lib/types";
+import { LoadingSpinner } from "@/components/ui/spinner";
+import { MOP } from "../lib/types";
 
 export function Home() {
     const [prompt, setPrompt] = useState<string>("");
-    const [mopData, setMopData] = useState<MOP | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [mopId, setMopId] = useState<string>(""); // State for MOP ID input
+    const navigate = useNavigate(); // Initialize navigate
 
     const handleSubmit = async () => {
-        const response = await callAPI<MOP>({
-            method: "POST",
-            url: "/createMOP", // Updated URL
-            payload: { prompt }
-        });
-        setMopData(response);
+        setIsLoading(true);
+        try {
+            const response = await callAPI<MOP>({
+                method: "POST",
+                url: "/createMOP",
+                payload: { prompt }
+            });
+            if (response) {
+                navigate(`/prompt?id=${Number(response.id)}`); // Ensure id is passed as a number
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleNavigateToPrompt = () => {
+        if (mopId) {
+            navigate(`/prompt?id=${mopId}`);
+        }
     };
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-            <h1 className="font-bold text-xl">Home</h1>
-            <div className="flex space-x-2">
+            <div className="flex flex-col space-y-2 items-center">
                 <Input
                     placeholder="Enter your prompt"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
+                    className="w-64"
                 />
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button onClick={handleSubmit} disabled={isLoading} className="w-36">
+                    {isLoading ? <LoadingSpinner /> : "Submit"}
+                </Button>
             </div>
-            {mopData && (
-                <div className="space-y-4">
-                    {/* Basic MOP Information */}
-                    <div className="space-y-2 border border-gray-300 rounded-lg p-4">
-                        <h2 className="font-bold text-lg">Basic Information</h2>
-                        <p><strong>ID:</strong> {mopData.id}</p>
-                        <p><strong>Title:</strong> {mopData.title}</p>
-                        <p><strong>Description:</strong> {mopData.description}</p>
-                        <p><strong>Date Created:</strong> {new Date(mopData.dateCreated).toLocaleString()}</p>
-                        <p><strong>Version:</strong> {mopData.version}</p>
-                    </div>
-
-                    {/* Prerequisites */}
-                    <div className="space-y-2 border border-gray-300 rounded-lg p-4">
-                        <h2 className="font-bold text-lg">Prerequisites</h2>
-                        <ul className="list-disc list-inside">
-                            {mopData.prerequisites.map((prerequisite, index) => (
-                                <li key={index}>{prerequisite}</li>
-                            ))}
-                        </ul>
-                    </div> 
-
-                    {/* Steps */}
-                    <div className="space-y-2 border border-gray-300 rounded-lg p-4">
-                        <h2 className="font-bold text-lg">Steps</h2>
-                        <ol className="list-decimal list-inside">
-                            {mopData.steps.map((step: Step) => (
-                                <li key={step.id}>
-                                    Step {step.stepNumber}: {step.action}
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-                </div>
-            )}
+            <div className="flex flex-col space-y-2 items-center pt-10">
+                <Input
+                    placeholder="Enter MOP ID"
+                    value={mopId}
+                    onChange={(e) => setMopId(e.target.value)}
+                    className="w-64"
+                />
+                <Button onClick={handleNavigateToPrompt} className="w-36">
+                    Go to Prompt
+                </Button>
+            </div>
         </div>
     );
 }

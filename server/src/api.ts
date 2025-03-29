@@ -45,7 +45,6 @@ export class API {
 
         // Generate MOP details using GPT
         let gptResponse = await this.gpt.generateResponse(detailedPrompt);
-        console.log(gptResponse);
         if (!gptResponse) {
             throw new Error("Failed to generate MOP details.");
         }
@@ -67,5 +66,13 @@ export class API {
         });
 
         return { data: createdMOP };
+    }
+
+    async getMOP(id: number): Promise<APIOutput<MOP>> { // Change id to number
+        const mop = await this.db.getMOP(id);
+        if (!mop) {
+            return { message: "MOP not found" };
+        }
+        return { data: mop };
     }
 }
