@@ -8,3 +8,5 @@ web/.env
 
 # Builds
 web/dist
+
+server/logs

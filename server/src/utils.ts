@@ -53,15 +53,15 @@ export async function validateSteps(
 
 export async function generateGeneralMOPInfo(
     gpt: GPT,
-    input: { prompt: string; difficultyLevel: string; riskAssessment: string; context: string }
+    input: { prompt: string; difficultyLevel?: string; riskAssessment?: string; context?: string }
 ): Promise<{ title: string; description: string; prerequisites: string[]; sections: string[] }> {
     const { prompt, difficultyLevel, riskAssessment, context } = input;
     const generalPrompt = `
         You are tasked with creating a Methods of Procedure (MOP) for a data center operation based on the following subject: "${prompt}".
         Additional context:
-        - Difficulty Level: "${difficultyLevel}"
-        - Risk Assessment: "${riskAssessment}"
-        - Context: "${context}"
+        ${difficultyLevel ? `- Difficulty Level: "${difficultyLevel}"` : ""}
+        ${riskAssessment ? `- Risk Assessment: "${riskAssessment}"` : ""}
+        ${context ? `- Context: "${context}"` : ""}
         The MOP should include:
         - A title summarizing the procedure.
         - A concise, technical description of the procedure.

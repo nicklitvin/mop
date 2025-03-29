@@ -1,1 +1,3 @@
-create a separate history page and view page for each mop
+fix prerequisites with one character items
+make prequiresistes and actions specific to the actual thing, assume you have the correct permissions and knowledge before going in
+be more specific, reconnecting is vague, instead use plug X into Y, use console is vague, instead use run command X, Y, Z in terminal

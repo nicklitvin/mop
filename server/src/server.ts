@@ -41,6 +41,7 @@ export class Server {
             const out = await this.api.hi();
             return res.status(out.message ? 400 : 200).json(out);
         } catch (err) {
+            console.error(err); // Log the error
             return res.status(500).json(err);
         }
     }
@@ -51,9 +52,15 @@ export class Server {
                 return res.status(400).json({ message: "Prompt is required" });
             }
 
-            const out = await this.api.createMOP(req.body.prompt); 
+            const out = await this.api.createMOP({
+                prompt: req.body.prompt,
+                difficultyLevel: req.body.difficultyLevel, // Optional
+                riskAssessment: req.body.riskAssessment, // Optional
+                context: req.body.context, // Optional
+            });
             return res.status(out.message ? 400 : 200).json(out);
         } catch (err) {
+            console.error(err); // Log the error
             return res.status(500).json(err);
         }
     }
@@ -67,6 +74,7 @@ export class Server {
             const mop = await this.api.getMOP(id);
             return res.status(200).json(mop);
         } catch (err) {
+            console.error(err); // Log the error
             return res.status(500).json(err);
         }
     }

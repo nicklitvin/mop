@@ -5,7 +5,7 @@ export interface APIOutput<T> {
 
 export interface MOPInput {
     prompt: string;
-    difficultyLevel: string;
-    riskAssessment: string;
-    context: string;
+    difficultyLevel?: string;
+    riskAssessment?: string;
+    context?: string;
 }
