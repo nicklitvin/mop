@@ -3,26 +3,11 @@ import OpenAI from "openai";
 export class GPT {
     private client: OpenAI;
 
-    constructor(private useMock: boolean = false) {
+    constructor() {
         this.client = new OpenAI({ apiKey: process.env.GPT_API_KEY });
-        if (this.useMock) {
-            console.log("Using mock GPT response.");
-        }
     }
 
     async generateResponse(prompt: string): Promise<string | null> {
-        if (this.useMock) {
-            return JSON.stringify({
-                title: "Sample MOP Title",
-                description: "This is a sample description for the MOP.",
-                prerequisites: ["Sample prerequisite 1", "Sample prerequisite 2"],
-                steps: [
-                    { action: "Do Action 1" },
-                    { action: "Do Action 2" },
-                ],
-            });
-        }
-
         try {
             const response = await this.client.chat.completions.create({
                 model: "gpt-4o-mini",

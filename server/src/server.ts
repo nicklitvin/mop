@@ -11,8 +11,8 @@ export class Server {
         getMOP: "/api/getMOP", // New URL
     };
 
-    constructor({ useBuild, useMock }: { useBuild: boolean; useMock: boolean }) {
-        this.api = new API(useMock);
+    constructor({ useBuild }: { useBuild: boolean }) {
+        this.api = new API();
         const app = express();
         app.use(express.json()); // Apply JSON middleware
         app.listen(process.env.LISTEN_PORT);
