@@ -19,3 +19,10 @@ export interface Step {
     mopId: number;
     action: string;
 }
+
+export interface MOPInput {
+    prompt: string;
+    difficultyLevel: string;
+    riskAssessment: string;
+    context: string;
+}

@@ -4,10 +4,14 @@ import { callAPI } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/spinner";
-import { MOP } from "../lib/types";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"; // Import ShadCN Select components
+import { MOP, MOPInput } from "../lib/types"; // Import MOPInput interface
 
 export function Home() {
     const [prompt, setPrompt] = useState<string>("");
+    const [difficultyLevel, setDifficultyLevel] = useState<string>(""); // State for difficulty level
+    const [riskAssessment, setRiskAssessment] = useState<string>(""); // State for risk assessment
+    const [context, setContext] = useState<string>(""); // State for context
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [mopId, setMopId] = useState<string>(""); // State for MOP ID input
     const navigate = useNavigate(); // Initialize navigate
@@ -15,10 +19,16 @@ export function Home() {
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
+            const mopInput: MOPInput = {
+                prompt,
+                difficultyLevel,
+                riskAssessment,
+                context,
+            };
             const response = await callAPI<MOP>({
                 method: "POST",
                 url: "/createMOP",
-                payload: { prompt }
+                payload: mopInput,
             });
             if (response) {
                 navigate(`/prompt?id=${Number(response.id)}`); // Ensure id is passed as a number
@@ -43,6 +53,32 @@ export function Home() {
                     onChange={(e) => setPrompt(e.target.value)}
                     className="w-64"
                 />
+                <Select onValueChange={setDifficultyLevel}>
+                    <SelectTrigger className="w-64">
+                        <SelectValue placeholder="Select Difficulty Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={setRiskAssessment}>
+                    <SelectTrigger className="w-64">
+                        <SelectValue placeholder="Select Risk Assessment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Input
+                    placeholder="Enter context"
+                    value={context}
+                    onChange={(e) => setContext(e.target.value)}
+                    className="w-64"
+                />
                 <Button onClick={handleSubmit} disabled={isLoading} className="w-36">
                     {isLoading ? <LoadingSpinner /> : "Submit"}
                 </Button>
@@ -55,7 +91,7 @@ export function Home() {
                     className="w-64"
                 />
                 <Button onClick={handleNavigateToPrompt} className="w-36">
-                    Go to Prompt
+                    Go to MOP
                 </Button>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { APIOutput } from "./types";
+import { APIOutput, MOPInput } from "./types";
 import { DB } from "./db";
 import { MOP, Step } from "@prisma/client";
 import { GPT } from "./gpt";
@@ -18,16 +18,24 @@ export class API {
         });
     }
 
-    async createMOP(prompt: string): Promise<APIOutput<MOP>> {
+    async createMOP(input: MOPInput): Promise<APIOutput<MOP>> {
+        const { prompt, difficultyLevel, riskAssessment, context } = input;
+
         // Construct a detailed prompt for GPT
         const detailedPrompt = `
-            You are tasked with creating a Methods of Procedure (MOP) for the following subject: "${prompt}".
+            You are tasked with creating a Methods of Procedure (MOP) for a data center operation based on the following subject: "${prompt}".
+            Additional context:
+            - Difficulty Level: "${difficultyLevel}"
+            - Risk Assessment: "${riskAssessment}"
+            - Context: "${context}"
             The MOP should include:
             - A title summarizing the procedure.
             - A concise, technical description of the procedure. For example: "To close the tie breaker between MSB B and MSB A so the load on MSB B can be fed from MSP A while a PM is being performed on the feeder to MSB B."
-            - A list of prerequisites required to perform the procedure, including specific tools, equipment, or conditions necessary to complete the procedure. For example: "screwdriver", "rack unit (optional)".
+            - A list of prerequisites required to perform the procedure, including specific tools, equipment, or conditions necessary to complete the procedure. For example: "screwdriver", "rack unit (optional)", "PPE (Personal Protective Equipment)".
             - A series of steps, where each step includes:
               - A single, specific, and atomic action that can be easily verified. Do not include "step 1", "step 2", etc. Just describe the action being taken.
+
+            Ensure the MOP is tailored to data center operations and adheres to industry best practices for safety and efficiency.
 
             Format the response as a JSON object with the following structure (do not include \`\`\`json or any other formatting markers):
             {
@@ -68,7 +76,7 @@ export class API {
         return { data: createdMOP };
     }
 
-    async getMOP(id: number): Promise<APIOutput<MOP>> { // Change id to number
+    async getMOP(id: number): Promise<APIOutput<MOP>> {
         const mop = await this.db.getMOP(id);
         if (!mop) {
             return { message: "MOP not found" };
