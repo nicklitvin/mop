@@ -12,12 +12,18 @@ export async function main() {
             type: 'boolean',
             description: 'Use frontend build'
         })
+        .option('mock', {
+            alias: 'm',
+            type: 'boolean',
+            description: 'Use mock GPT responses'
+        })
         .help('h')
         .alias('h', 'help')
         .parse()
     
     new Server({
-        useBuild: Boolean(args.build)
+        useBuild: Boolean(args.build),
+        useMock: Boolean(args.mock)
     })
 }
 

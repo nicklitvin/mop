@@ -7,9 +7,9 @@ export class API {
     private db: DB;
     private gpt: GPT;
 
-    constructor() {
+    constructor(useMock: boolean) {
         this.db = new DB();
-        this.gpt = new GPT();
+        this.gpt = new GPT(useMock);
     }
 
     async hi(): Promise<APIOutput<string>> {
