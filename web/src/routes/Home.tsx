@@ -31,7 +31,7 @@ export function Home() {
                 payload: mopInput,
             });
             if (response) {
-                navigate(`/prompt?id=${Number(response.id)}`); // Ensure id is passed as a number
+                navigate(`/mop?id=${Number(response.id)}`); // Ensure id is passed as a number
             }
         } finally {
             setIsLoading(false);
@@ -40,7 +40,7 @@ export function Home() {
 
     const handleNavigateToPrompt = () => {
         if (mopId) {
-            navigate(`/prompt?id=${mopId}`);
+            navigate(`/mop?id=${mopId}`);
         }
     };
 

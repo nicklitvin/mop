@@ -3,7 +3,7 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Layout } from './routes/Layout'
 import { Home } from './routes/Home'
-import { Prompt } from './routes/Prompt';
+import { MOPPage } from './routes/MOP';
 
 export const router = createBrowserRouter([
     {
@@ -17,8 +17,8 @@ export const router = createBrowserRouter([
                         element: <Home />
                     },
                     {
-                        path: "/prompt",
-                        element: <Prompt />
+                        path: "/mop",
+                        element: <MOPPage />
                     }
                 ]
             }

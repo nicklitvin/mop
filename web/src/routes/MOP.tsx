@@ -4,8 +4,9 @@ import { callAPI } from "../lib/utils";
 import { LoadingSpinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
 import { MOP, Step } from "../lib/types";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/table";
 
-export function Prompt() {
+export function MOPPage() {
     const [searchParams] = useSearchParams();
     const [mopData, setMopData] = useState<MOP | null>(null);
     const navigate = useNavigate();
@@ -53,23 +54,45 @@ export function Prompt() {
                 {/* Prerequisites */}
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">
                     <h2 className="font-bold text-lg">Prerequisites</h2>
-                    <ul className="list-disc list-inside">
-                        {mopData.prerequisites.map((prerequisite, index) => (
-                            <li key={index}>{prerequisite}</li>
-                        ))}
-                    </ul>
+                    <Table className="w-full">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-5/6">Item</TableHead>
+                                <TableHead className="w-1/6">Initials</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mopData.prerequisites.map((prerequisite, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="w-11/12">{prerequisite}</TableCell>
+                                    <TableCell className="w-1/12"></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
 
                 {/* Steps */}
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">
                     <h2 className="font-bold text-lg">Steps</h2>
-                    <ol className="list-decimal list-inside">
-                        {mopData.steps.map((step: Step) => (
-                            <li key={step.id}>
-                                {step.action}
-                            </li>
-                        ))}
-                    </ol>
+                    <Table className="w-full">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-1/12">Step #</TableHead>
+                                <TableHead className="w-5/6">Action</TableHead>
+                                <TableHead className="w-1/12">Initials</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mopData.steps.map((step: Step, index) => (
+                                <TableRow key={step.id}>
+                                    <TableCell className="w-1/12">{index + 1}</TableCell>
+                                    <TableCell className="w-5/6">{step.action}</TableCell>
+                                    <TableCell className="w-1/12"></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
 
                 <Button onClick={() => navigate("/")} className="w-36">
