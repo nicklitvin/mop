@@ -2,6 +2,7 @@ import { APIOutput, MOPInput } from "./types";
 import { DB } from "./db";
 import { MOP, Step } from "@prisma/client";
 import { GPT } from "./gpt";
+import { updatePrerequisites, validateSteps } from "./utils";
 
 export class API {
     private db: DB;
@@ -21,8 +22,8 @@ export class API {
     async createMOP(input: MOPInput): Promise<APIOutput<MOP>> {
         const { prompt, difficultyLevel, riskAssessment, context } = input;
 
-        // Construct a detailed prompt for GPT
-        const detailedPrompt = `
+        // Step 1: Generate general MOP info and sections
+        const generalPrompt = `
             You are tasked with creating a Methods of Procedure (MOP) for a data center operation based on the following subject: "${prompt}".
             Additional context:
             - Difficulty Level: "${difficultyLevel}"
@@ -30,44 +31,61 @@ export class API {
             - Context: "${context}"
             The MOP should include:
             - A title summarizing the procedure.
-            - A concise, technical description of the procedure. For example: "To close the tie breaker between MSB B and MSB A so the load on MSB B can be fed from MSP A while a PM is being performed on the feeder to MSB B."
-            - A list of prerequisites required to perform the procedure, including specific tools, equipment, or conditions necessary to complete the procedure. For example: "screwdriver", "rack unit (optional)", "PPE (Personal Protective Equipment)".
-            - A series of steps, where each step includes:
-              - A single, specific, and atomic action that can be easily verified. Do not include "step 1", "step 2", etc. Just describe the action being taken.
+            - A concise, technical description of the procedure.
+            - A list of prerequisites required to perform the procedure.
+            - General sections (not detailed steps) that outline the main parts of the procedure.
 
-            Ensure the MOP is tailored to data center operations and adheres to industry best practices for safety and efficiency.
-
-            Format the response as a JSON object with the following structure (do not include \`\`\`json or any other formatting markers):
+            Return the response as a JSON object in the exact format below, with no additional text or markers:
             {
                 "title": "string",
                 "description": "string",
                 "prerequisites": ["string", ...],
-                "steps": [
-                    {
-                        "action": "string"
-                    },
-                    ...
-                ]
+                "sections": ["string", ...]
             }
         `;
+        const generalResponse = await this.gpt.generateResponse(generalPrompt);
+        if (!generalResponse) {
+            throw new Error("Failed to generate general MOP info.");
+        }
+        const generalData = JSON.parse(generalResponse);
 
-        // Generate MOP details using GPT
-        let gptResponse = await this.gpt.generateResponse(detailedPrompt);
-        if (!gptResponse) {
-            throw new Error("Failed to generate MOP details.");
+        // Step 2: Generate detailed steps for each section
+        const detailedSteps: Array<{ action: string }> = [];
+        for (const section of generalData.sections) {
+            const sectionPrompt = `
+                You are creating detailed steps for a Methods of Procedure (MOP) for data center operations.
+                The MOP is titled "${generalData.title}" and is described as follows: "${generalData.description}".
+                Based on the section "${section}" of the MOP, generate a detailed list of steps.
+                Each step should include:
+                - A single, specific, and atomic action that can be easily verified.
+                - If a specific tool or equipment is needed, explicitly mention it and prefix it with one of the following words: "use", "require", or "need".
+
+                Return the response as a JSON array in the exact format below, with no additional text or markers:
+                [
+                    { "action": "string" },
+                    ...
+                ]
+            `;
+            const sectionResponse = await this.gpt.generateResponse(sectionPrompt);
+            if (!sectionResponse) {
+                throw new Error(`Failed to generate steps for section: ${section}`);
+            }
+            const steps = JSON.parse(sectionResponse);
+            detailedSteps.push(...steps);
         }
 
-        // Remove ```json prefix and suffix if present
-        gptResponse = gptResponse.replace(/^```json\s*/, "").replace(/```$/, "");
+        // Step 3: Validate steps
+        const validatedSteps = await validateSteps(detailedSteps, this.gpt);
 
-        const mopData = JSON.parse(gptResponse);
+        // Step 4: Update prerequisites
+        const updatedPrerequisites = updatePrerequisites(validatedSteps, generalData.prerequisites);
 
-        // Save MOP to the database
+        // Step 5: Save MOP to the database
         const createdMOP = await this.db.createMOP({
-            title: mopData.title,
-            description: mopData.description,
-            prerequisites: mopData.prerequisites,
-            steps: mopData.steps.map((step: any, index: number) => ({
+            title: generalData.title,
+            description: generalData.description,
+            prerequisites: updatedPrerequisites,
+            steps: validatedSteps.map((step, index) => ({
                 stepNumber: index + 1,
                 action: step.action,
             })),
