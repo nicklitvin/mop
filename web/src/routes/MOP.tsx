@@ -5,10 +5,12 @@ import { LoadingSpinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
 import { MOP, Step } from "../lib/types";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/table";
+import { toast } from "sonner"; // Import toast for notifications
 
 export function MOPPage() {
     const [searchParams] = useSearchParams();
     const [mopData, setMopData] = useState<MOP | null>(null);
+    const [comment, setComment] = useState(""); // State for input box
     const navigate = useNavigate();
     const mopId = searchParams.get("id");
 
@@ -29,6 +31,24 @@ export function MOPPage() {
         };
         fetchMOP();
     }, [mopId]);
+
+    const handleSubmit = async () => {
+        if (!comment.trim()) {
+            toast("Comment cannot be empty.");
+            return;
+        }
+
+        const response = await callAPI({
+            method: "POST",
+            url: "/updatePrompt",
+            payload: { comment },
+        });
+
+        if (response) {
+            toast("Submission successful!");
+            setComment(""); // Clear input box
+        }
+    };
 
     if (!mopData) {
         return (
@@ -93,6 +113,20 @@ export function MOPPage() {
                             ))}
                         </TableBody>
                     </Table>
+                </div>
+
+                {/* Add Comment */}
+                <div className="space-y-2 border border-gray-300 rounded-lg p-4">
+                    <h2 className="font-bold text-lg">Provide Feedback</h2>
+                    <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg p-2"
+                        placeholder="Enter your feedback here..."
+                    />
+                    <Button onClick={handleSubmit} className="w-36">
+                        Submit
+                    </Button>
                 </div>
 
                 <Button onClick={() => navigate("/")} className="w-36">
