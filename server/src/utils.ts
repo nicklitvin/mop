@@ -40,6 +40,15 @@ export async function validateSteps(
         - Adjust the steps to make them clear, concise, and specific. For example:
             - "Reconnect switches" -> "Plug cable X into port Y on switch Z."
             - "Use console" -> "Run commands X, Y, Z in the terminal."
+        - Ensure the steps adhere to security and industry standards, such as:
+            - Compliance with ISO 27001 for information security.
+            - Adherence to NIST guidelines for secure operations.
+            - Avoidance of actions that could compromise system integrity or data privacy.
+        - For data center operations specifically:
+            - Ensure physical safety measures are included, such as proper handling of hardware or cables.
+            - Verify that steps involving power systems (e.g., UPS, PDUs) include precautions to avoid outages or equipment damage.
+            - Confirm that network-related steps (e.g., switch configurations, cable connections) follow best practices for redundancy and failover.
+            - Ensure environmental controls (e.g., cooling systems) are not disrupted during the procedure.
 
         Return the validated steps as a JSON array in the exact format below, with no additional text or markers:
         [
@@ -104,6 +113,15 @@ export async function generateDetailedSteps(
             - Be specific to a single action or physical item.
             - Include clear instructions, e.g., "Plug cable X into port Y on switch Z" or "Run commands X, Y, Z in the terminal."
             - Assume the user has the correct permissions and knowledge, so there is no need to check for approvals or prerequisites.
+            - Ensure compliance with security and industry standards, such as:
+                - ISO 27001 for information security.
+                - NIST guidelines for secure operations.
+                - Avoidance of actions that could compromise system integrity or data privacy.
+            - For data center operations specifically:
+                - Include physical safety measures, such as proper handling of hardware or cables.
+                - Ensure steps involving power systems (e.g., UPS, PDUs) include precautions to avoid outages or equipment damage.
+                - Verify that network-related steps (e.g., switch configurations, cable connections) follow best practices for redundancy and failover.
+                - Ensure environmental controls (e.g., cooling systems) are not disrupted during the procedure.
 
             Return the response as a JSON array in the exact format below, with no additional text or markers:
             [
