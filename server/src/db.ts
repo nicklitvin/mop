@@ -40,6 +40,13 @@ export class DB {
         });
     }
 
+    async getLastMOP() {
+        return await this.prisma.mOP.findFirst({
+            orderBy: { id: "desc" }, // Fetch the MOP with the largest ID
+            include: { steps: true },
+        });
+    }
+
     async savePrompt(type: PromptType, content: string) {
         return await this.prisma.prompt.upsert({
             where: { type },

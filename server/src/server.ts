@@ -11,6 +11,7 @@ export class Server {
         createMOP: "/api/createMOP", // Updated URL
         getMOP: "/api/getMOP", // New URL
         updatePrompt: "/api/updatePrompt", // New URL
+        lastMOP: "/api/lastMOP", // New URL
     };
 
     constructor({ useBuild }: { useBuild: boolean }) {
@@ -37,6 +38,7 @@ export class Server {
         app.post(this.URLS.createMOP, this.createMOP.bind(this)); // Updated URL usage
         app.get(this.URLS.getMOP, this.getMOP.bind(this)); // Add new endpoint
         app.post(this.URLS.updatePrompt, this.updatePrompt.bind(this)); // Add new endpoint
+        app.get(this.URLS.lastMOP, this.getLastMOP.bind(this)); // Add new endpoint
     }
 
     async hi(req: Request, res: Response) {
@@ -92,6 +94,16 @@ export class Server {
             // Call the API to handle the update
             const updatedPrompt = await this.api.updatePrompt({ comment });
             return res.status(200).json(updatedPrompt);
+        } catch (err) {
+            console.error(err); // Log the error
+            return res.status(500).json(err);
+        }
+    }
+
+    async getLastMOP(req: Request, res: Response) {
+        try {
+            const lastMOP = await this.api.getLastMOP();
+            return res.status(lastMOP.message ? 400 : 200).json(lastMOP);
         } catch (err) {
             console.error(err); // Log the error
             return res.status(500).json(err);

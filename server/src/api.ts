@@ -61,6 +61,14 @@ export class API {
         return { data: mop };
     }
 
+    async getLastMOP(): Promise<APIOutput<MOP>> {
+        const lastMOP = await this.db.getLastMOP();
+        if (!lastMOP) {
+            return { message: "No MOPs found" };
+        }
+        return { data: lastMOP };
+    }
+
     async updatePrompt(input: { comment: string }): Promise<APIOutput<{ type: PromptType; content: string }>> {
         const { comment } = input;
 

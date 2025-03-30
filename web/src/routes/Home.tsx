@@ -13,7 +13,6 @@ export function Home() {
     const [riskAssessment, setRiskAssessment] = useState<string>(""); // State for risk assessment
     const [context, setContext] = useState<string>(""); // State for context
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [mopId, setMopId] = useState<string>(""); // State for MOP ID input
     const navigate = useNavigate(); // Initialize navigate
 
     const handleSubmit = async () => {
@@ -38,9 +37,17 @@ export function Home() {
         }
     };
 
-    const handleNavigateToPrompt = () => {
-        if (mopId) {
-            navigate(`/mop?id=${mopId}`);
+    const handleNavigateToLastMOP = async () => {
+        try {
+            const response = await callAPI<MOP>({
+                method: "GET",
+                url: "/lastMOP",
+            });
+            if (response) {
+                navigate(`/mop?id=${response.id}`);
+            }
+        } catch (error) {
+            console.error("Failed to fetch the last MOP:", error);
         }
     };
 
@@ -88,15 +95,8 @@ export function Home() {
                 </Button>
             </div>
             <div className="flex flex-col space-y-2 items-center pt-10">
-                <label className="w-64 text-left">MOP ID</label>
-                <Input
-                    placeholder="Enter MOP ID"
-                    value={mopId}
-                    onChange={(e) => setMopId(e.target.value)}
-                    className="w-64"
-                />
-                <Button onClick={handleNavigateToPrompt} className="w-36">
-                    Go to MOP
+                <Button onClick={handleNavigateToLastMOP} className="w-36">
+                    Go to Last MOP
                 </Button>
             </div>
         </div>
