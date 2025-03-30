@@ -58,10 +58,8 @@ export async function validateSteps(
             ...
         ]
     `;
-    const savedPrompt = db.savePrompt
-        ? await db.savePrompt("validation", validationPrompt) // Use db.savePrompt if it exists
-        : { content: validationPrompt }; // Fallback if savePrompt is not defined
-    const response = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
+    const savedPrompt = await db.savePrompt("validation", validationPrompt); // Assume savePrompt is always defined
+    const response = await gpt.generateResponse(savedPrompt.content);
     if (!response) {
         throw new Error("Failed to validate steps using GPT.");
     }
@@ -75,18 +73,18 @@ export async function generateGeneralMOPInfo(
 ): Promise<{ title: string; description: string; prerequisites: string[]; sections: string[] }> {
     const { prompt, difficultyLevel, riskAssessment, context } = input;
     const generalPrompt = `
-        You are tasked with creating a Methods of Procedure (MOP) for a data center operation based on the following subject: "${prompt}".
-        Additional context:
-        ${difficultyLevel ? `- Difficulty Level: "${difficultyLevel}"` : ""}
-        ${riskAssessment ? `- Risk Assessment: "${riskAssessment}"` : ""}
-        ${context ? `- Context: "${context}"` : ""}
-        The MOP should include:
+        Create a Methods of Procedure (MOP) for data center operations on: "${prompt}".
+        Context:
+        ${difficultyLevel ? `- Difficulty: "${difficultyLevel}"` : ""}
+        ${riskAssessment ? `- Risk: "${riskAssessment}"` : ""}
+        ${context ? `- Additional Context: "${context}"` : ""}
+        Include:
         - A title summarizing the procedure.
-        - A concise, technical description of the procedure.
-        - A list of prerequisites required to perform the procedure. Each prerequisite should be specific to a single physical item or tool, e.g., "[screwdriver]", "[network cable]".
-        - General sections (not detailed steps) that outline the main parts of the procedure.
+        - A concise, technical description.
+        - A list of specific prerequisites such as tools or equipment (e.g., "screwdriver", "network cable").
+        - Up to 8 general sections outlining the main parts of the procedure.
 
-        Return the response as a JSON object in the exact format below, with no additional text or markers:
+        Return as JSON:
         {
             "title": "string",
             "description": "string",
@@ -94,8 +92,8 @@ export async function generateGeneralMOPInfo(
             "sections": ["string", ...]
         }
     `;
-    const savedPrompt = { content: generalPrompt }; // Replace db.savePrompt with a direct object
-    const generalResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
+    const savedPrompt = await db.savePrompt("generalInfo", generalPrompt); // Assume savePrompt is always defined
+    const generalResponse = await gpt.generateResponse(savedPrompt.content);
     if (!generalResponse) {
         throw new Error("Failed to generate general MOP info.");
     }
@@ -110,33 +108,22 @@ export async function generateDetailedSteps(
     const detailedSteps: Array<{ action: string }> = [];
     for (const section of generalData.sections) {
         const sectionPrompt = `
-            You are creating detailed steps for a Methods of Procedure (MOP) for data center operations.
-            The MOP is titled "${generalData.title}" and is described as follows: "${generalData.description}".
-            Based on the section "${section}" of the MOP, generate a detailed list of steps.
-            Each step should:
-            - Be specific to a single action or physical item.
-            - Include clear instructions, e.g., "Plug cable X into port Y on switch Z" or "Run commands X, Y, Z in the terminal."
-            - Assume the user has the correct permissions and knowledge, so there is no need to check for approvals or prerequisites.
-            - Ensure compliance with security and industry standards, such as:
-                - ISO 27001 for information security.
-                - NIST guidelines for secure operations.
-                - Avoidance of actions that could compromise system integrity or data privacy.
-            - For data center operations specifically:
-                - Include physical safety measures, such as proper handling of hardware or cables.
-                - Ensure steps involving power systems (e.g., UPS, PDUs) include precautions to avoid outages or equipment damage.
-                - Verify that network-related steps (e.g., switch configurations, cable connections) follow best practices for redundancy and failover.
-                - Ensure environmental controls (e.g., cooling systems) are not disrupted during the procedure.
+            Create detailed steps for the MOP titled "${generalData.title}" described as: "${generalData.description}".
+            Section: "${section}".
+            Each step must:
+            - Be specific to the actual task (e.g., "Plug cable X into port Y on switch Z").
+            - Avoid vague instructions.
+            - Mention tools or equipment in square brackets (e.g., "[screwdriver]", "[network cable]"), but ignore generic items like "pen" or "paper".
+            - Ensure compliance with security and industry standards.
 
-            Return the response as a JSON array in the exact format below, with no additional text or markers:
+            Return as JSON:
             [
                 { "action": "string" },
                 ...
             ]
         `;
-        const savedPrompt = db.savePrompt
-            ? await db.savePrompt("detailedSteps", sectionPrompt) // Use db.savePrompt if it exists
-            : { content: sectionPrompt }; // Fallback if savePrompt is not defined
-        const sectionResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
+        const savedPrompt = await db.savePrompt("detailedSteps", sectionPrompt); // Assume savePrompt is always defined
+        const sectionResponse = await gpt.generateResponse(savedPrompt.content);
         if (!sectionResponse) {
             throw new Error(`Failed to generate steps for section: ${section}`);
         }
