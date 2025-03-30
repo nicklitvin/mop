@@ -57,14 +57,14 @@ export function MOPPage() {
                     <Table className="w-full">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-5/6">Item</TableHead>
-                                <TableHead className="w-1/6">Initials</TableHead>
+                                <TableHead className="w-11/12">Item</TableHead>
+                                <TableHead className="w-1/12">Initials</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {mopData.prerequisites.map((prerequisite, index) => (
                                 <TableRow key={index}>
-                                    <TableCell className="w-11/12">{prerequisite}</TableCell>
+                                    <TableCell className="w-11/12 whitespace-normal">{prerequisite}</TableCell>
                                     <TableCell className="w-1/12"></TableCell>
                                 </TableRow>
                             ))}
@@ -87,7 +87,7 @@ export function MOPPage() {
                             {mopData.steps.map((step: Step, index) => (
                                 <TableRow key={step.id}>
                                     <TableCell className="w-1/12">{index + 1}</TableCell>
-                                    <TableCell className="w-5/6">{step.action}</TableCell>
+                                    <TableCell className="w-5/6 whitespace-normal">{step.action}</TableCell>
                                     <TableCell className="w-1/12"></TableCell>
                                 </TableRow>
                             ))}
