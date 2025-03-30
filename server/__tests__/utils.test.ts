@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps } from "../src/utils";
 import { GPT } from "../src/gpt";
+import { DB } from "../src/db";
 
 vi.mock("../src/gpt", () => {
     return {
@@ -10,11 +11,21 @@ vi.mock("../src/gpt", () => {
     };
 });
 
+vi.mock("../src/db", () => {
+    return {
+        DB: vi.fn().mockImplementation(() => ({
+            savePrompt: vi.fn().mockResolvedValue({ content: "mocked prompt content" }) // Ensure savePrompt returns valid content
+        }))
+    };
+});
+
 describe("utils", () => {
     let gpt: GPT;
+    let db: DB;
 
     beforeEach(() => {
         gpt = new GPT(); // Use the mocked GPT instance
+        db = new DB(); // Use the mocked DB instance
     });
 
     describe("updatePrerequisites", () => {
@@ -45,14 +56,14 @@ describe("utils", () => {
             vi.spyOn(gpt, "generateResponse").mockResolvedValueOnce(
                 JSON.stringify(steps)
             );
-            const result = await validateSteps(steps, gpt);
+            const result = await validateSteps(steps, gpt, db); // Pass db as an argument
             expect(result).toEqual(steps);
         });
 
         it("should throw an error if GPT response is invalid", async () => {
             vi.spyOn(gpt, "generateResponse").mockResolvedValueOnce(null);
             const steps = [{ action: "Step 1: Do something" }];
-            await expect(validateSteps(steps, gpt)).rejects.toThrow(
+            await expect(validateSteps(steps, gpt, db)).rejects.toThrow( // Pass db as an argument
                 "Failed to validate steps using GPT."
             );
         });
@@ -74,7 +85,7 @@ describe("utils", () => {
             });
             vi.spyOn(gpt, "generateResponse").mockResolvedValueOnce(mockResponse);
 
-            const result = await generateGeneralMOPInfo(gpt, input);
+            const result = await generateGeneralMOPInfo(gpt, db, input); // Pass db as an argument
             expect(result).toEqual(JSON.parse(mockResponse));
         });
 
@@ -87,7 +98,7 @@ describe("utils", () => {
                 riskAssessment: "Low",
                 context: "Data center upgrade"
             };
-            await expect(generateGeneralMOPInfo(gpt, input)).rejects.toThrow(
+            await expect(generateGeneralMOPInfo(gpt, db, input)).rejects.toThrow( // Pass db as an argument
                 "Failed to generate general MOP info."
             );
         });
@@ -108,7 +119,7 @@ describe("utils", () => {
                 .mockResolvedValueOnce(mockResponses[0])
                 .mockResolvedValueOnce(mockResponses[1]);
 
-            const result = await generateDetailedSteps(gpt, generalData);
+            const result = await generateDetailedSteps(gpt, db, generalData); // Pass db as an argument
             expect(result).toEqual([
                 { action: "Gather tools" },
                 { action: "Inspect rack location" },
@@ -124,7 +135,7 @@ describe("utils", () => {
             };
             vi.spyOn(gpt, "generateResponse").mockResolvedValueOnce(null);
 
-            await expect(generateDetailedSteps(gpt, generalData)).rejects.toThrow(
+            await expect(generateDetailedSteps(gpt, db, generalData)).rejects.toThrow( // Pass db as an argument
                 "Failed to generate steps for section: Preparation"
             );
         });

@@ -2,7 +2,6 @@ import { API } from "./api";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
-import { PromptType } from "@prisma/client";
 
 export class Server {
     private api: API;

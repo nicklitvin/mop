@@ -1,4 +1,5 @@
-import { PrismaClient, PromptType } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
+import { PromptType } from "./types"; // Updated import to use the TypeScript type
 
 export class DB {
     private prisma: PrismaClient;
@@ -17,9 +18,7 @@ export class DB {
             data: {
                 title: data.title,
                 description: data.description,
-                prerequisites: data.prerequisites.map(prerequisite =>
-                    prerequisite.replace(/[\[\]]/g, "") // Remove square brackets
-                ),
+                prerequisites: data.prerequisites.map(item => item.replace(/[\[\]]/g, "")).join("|"), // Remove square brackets and join
                 steps: {
                     create: data.steps.map((step) => ({
                         stepNumber: step.stepNumber,
@@ -33,18 +32,32 @@ export class DB {
         });
     }
 
-    async getMOP(id: number) { // Change id to number
-        return await this.prisma.mOP.findUnique({
+    async getMOP(id: number) {
+        const mop = await this.prisma.mOP.findUnique({
             where: { id },
             include: { steps: true },
         });
+        if (mop) {
+            return {
+                ...mop,
+                prerequisites: mop.prerequisites.split("|"), // Convert '|' separated string back to array
+            };
+        }
+        return null;
     }
 
     async getLastMOP() {
-        return await this.prisma.mOP.findFirst({
+        const mop = await this.prisma.mOP.findFirst({
             orderBy: { id: "desc" }, // Fetch the MOP with the largest ID
             include: { steps: true },
         });
+        if (mop) {
+            return {
+                ...mop,
+                prerequisites: mop.prerequisites.split("|"), // Convert '|' separated string back to array
+            };
+        }
+        return null;
     }
 
     async savePrompt(type: PromptType, content: string) {

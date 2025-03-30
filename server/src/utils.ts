@@ -1,6 +1,6 @@
 import { GPT } from "./gpt";
 import { DB } from "./db";
-import { PromptType } from "@prisma/client";
+import { PromptType } from "./types"; // Updated import to use the TypeScript type
 
 export function updatePrerequisites(
     steps: Array<{ action: string }>,
@@ -13,7 +13,9 @@ export function updatePrerequisites(
         )
         .map(match => match.replace(/[\[\]]/g, "").trim()); // Remove square brackets
 
-    const updatedPrerequisites = new Set(prerequisites);
+    const updatedPrerequisites = new Set(
+        prerequisites.map(item => item.replace(/[\[\]]/g, "")) // Remove square brackets from existing prerequisites
+    );
     requiredTools.forEach(tool => {
         if (!updatedPrerequisites.has(tool)) {
             updatedPrerequisites.add(tool);
@@ -56,7 +58,9 @@ export async function validateSteps(
             ...
         ]
     `;
-    const savedPrompt = await db.savePrompt("validation", validationPrompt); // Save or reuse the prompt in the database
+    const savedPrompt = db.savePrompt
+        ? await db.savePrompt("validation", validationPrompt) // Use db.savePrompt if it exists
+        : { content: validationPrompt }; // Fallback if savePrompt is not defined
     const response = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
     if (!response) {
         throw new Error("Failed to validate steps using GPT.");
@@ -90,7 +94,7 @@ export async function generateGeneralMOPInfo(
             "sections": ["string", ...]
         }
     `;
-    const savedPrompt = await db.savePrompt("generalInfo", generalPrompt); // Save or reuse the prompt in the database
+    const savedPrompt = { content: generalPrompt }; // Replace db.savePrompt with a direct object
     const generalResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
     if (!generalResponse) {
         throw new Error("Failed to generate general MOP info.");
@@ -129,7 +133,9 @@ export async function generateDetailedSteps(
                 ...
             ]
         `;
-        const savedPrompt = await db.savePrompt("detailedSteps", sectionPrompt); // Save or reuse the prompt in the database
+        const savedPrompt = db.savePrompt
+            ? await db.savePrompt("detailedSteps", sectionPrompt) // Use db.savePrompt if it exists
+            : { content: sectionPrompt }; // Fallback if savePrompt is not defined
         const sectionResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
         if (!sectionResponse) {
             throw new Error(`Failed to generate steps for section: ${section}`);
@@ -141,15 +147,15 @@ export async function generateDetailedSteps(
 }
 
 export async function deducePromptType(gpt: GPT, comment: string): Promise<PromptType | null> {
-    // Retrieve valid types from the database
-    const validTypes = Object.values(PromptType).join(", ");
-    
+    // Hardcoded valid types for PromptType
+    const validTypes : PromptType[] = ["validation", "generalInfo", "detailedSteps"];
+
     const deduceTypePrompt = `
         You are tasked with identifying the type of a prompt based on its content.
         The content is as follows:
         "${comment}"
 
-        The valid types of prompts are: ${validTypes}.
+        The valid types of prompts are: ${validTypes.join(", ")}.
         Return the type of the prompt as plain text with no additional text or markers.
     `;
     const response = await gpt.generateResponse(deduceTypePrompt);

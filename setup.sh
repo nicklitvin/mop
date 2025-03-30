@@ -7,7 +7,7 @@ cd web && npm install && cd ../server && npm install
 # Configure environment variables
 echo "Setting up environment variables..."
 cat <<EOT > server/.env
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/<any_table_name>
+DATABASE_URL=file:./dev.db
 LISTEN_PORT=3000
 GPT_API_KEY=<your_openai_api_key>
 WEB_IP=http://localhost

@@ -10,3 +10,4 @@ web/.env
 web/dist
 
 server/logs
+server/dev.db

@@ -1,6 +1,6 @@
-import { APIOutput, MOPInput } from "./types";
+import { APIOutput, MOPInput, PromptType, OutputMOP } from "./types";
 import { DB } from "./db";
-import { MOP, Step, PromptType } from "@prisma/client";
+import { MOP } from "@prisma/client";
 import { GPT } from "./gpt";
 import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps, deducePromptType } from "./utils";
 
@@ -53,20 +53,24 @@ export class API {
         return { data: createdMOP };
     }
 
-    async getMOP(id: number): Promise<APIOutput<MOP>> {
+    async getMOP(id: number): Promise<APIOutput<OutputMOP>> {
         const mop = await this.db.getMOP(id);
         if (!mop) {
             return { message: "MOP not found" };
         }
-        return { data: mop };
+        return { 
+            data: mop
+        };
     }
 
-    async getLastMOP(): Promise<APIOutput<MOP>> {
+    async getLastMOP(): Promise<APIOutput<OutputMOP>> {
         const lastMOP = await this.db.getLastMOP();
         if (!lastMOP) {
             return { message: "No MOPs found" };
         }
-        return { data: lastMOP };
+        return { 
+            data: lastMOP
+        };
     }
 
     async updatePrompt(input: { comment: string }): Promise<APIOutput<{ type: PromptType; content: string }>> {

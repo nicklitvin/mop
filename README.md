@@ -2,12 +2,9 @@
 
 1. **Install Prerequisites**:
    - Install [Node.js](https://nodejs.org/).
-   - Install [PostgreSQL](https://www.postgresql.org/).
 
 2. **Update Environment Variables**:
    - Before running the setup script, update the following values in the `setup.sh` script:
-     - Replace `<username>` and `<password>` in the `DATABASE_URL` with your PostgreSQL credentials.
-     - Replace `<any_table_name>` with your desired database name.
      - Replace `<your_openai_api_key>` with your OpenAI API key.
 
 3. **Run the Setup Script**:
@@ -36,7 +33,7 @@ If you prefer to set up the project manually, follow these steps:
 2. **Configure Environment Variables**:
    - In the `/server` directory, create a `.env` file with the following content:
      ```
-     DATABASE_URL=postgresql://<username>:<password>@localhost:5432/<any_table_name>
+     DATABASE_URL=file:./dev.db
      LISTEN_PORT=3000
      GPT_API_KEY=<your_openai_api_key>
      WEB_IP=http://localhost
