@@ -47,12 +47,14 @@ export function Home() {
     return (
         <div className="flex-1 flex flex-col items-center justify-center space-y-4">
             <div className="flex flex-col space-y-2 items-center">
+                <label className="w-64 text-left">Prompt</label>
                 <Input
                     placeholder="Enter your prompt"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="w-64"
                 />
+                <label className="w-64 text-left">Difficulty Level</label>
                 <Select onValueChange={setDifficultyLevel}>
                     <SelectTrigger className="w-64">
                         <SelectValue placeholder="Select Difficulty Level" />
@@ -63,6 +65,7 @@ export function Home() {
                         <SelectItem value="Hard">Hard</SelectItem>
                     </SelectContent>
                 </Select>
+                <label className="w-64 text-left">Risk Assessment</label>
                 <Select onValueChange={setRiskAssessment}>
                     <SelectTrigger className="w-64">
                         <SelectValue placeholder="Select Risk Assessment" />
@@ -73,6 +76,7 @@ export function Home() {
                         <SelectItem value="High">High</SelectItem>
                     </SelectContent>
                 </Select>
+                <label className="w-64 text-left">Context</label>
                 <Input
                     placeholder="Enter context"
                     value={context}
@@ -84,6 +88,7 @@ export function Home() {
                 </Button>
             </div>
             <div className="flex flex-col space-y-2 items-center pt-10">
+                <label className="w-64 text-left">MOP ID</label>
                 <Input
                     placeholder="Enter MOP ID"
                     value={mopId}

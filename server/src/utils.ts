@@ -56,8 +56,8 @@ export async function validateSteps(
             ...
         ]
     `;
-    await db.savePrompt("validation", validationPrompt); // Save or reuse the prompt in the database
-    const response = await gpt.generateResponse(validationPrompt);
+    const savedPrompt = await db.savePrompt("validation", validationPrompt); // Save or reuse the prompt in the database
+    const response = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
     if (!response) {
         throw new Error("Failed to validate steps using GPT.");
     }
@@ -90,8 +90,8 @@ export async function generateGeneralMOPInfo(
             "sections": ["string", ...]
         }
     `;
-    await db.savePrompt("generalInfo", generalPrompt); // Save or reuse the prompt in the database
-    const generalResponse = await gpt.generateResponse(generalPrompt);
+    const savedPrompt = await db.savePrompt("generalInfo", generalPrompt); // Save or reuse the prompt in the database
+    const generalResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
     if (!generalResponse) {
         throw new Error("Failed to generate general MOP info.");
     }
@@ -129,8 +129,8 @@ export async function generateDetailedSteps(
                 ...
             ]
         `;
-        await db.savePrompt("detailedSteps", sectionPrompt); // Save or reuse the prompt in the database
-        const sectionResponse = await gpt.generateResponse(sectionPrompt);
+        const savedPrompt = await db.savePrompt("detailedSteps", sectionPrompt); // Save or reuse the prompt in the database
+        const sectionResponse = await gpt.generateResponse(savedPrompt.content); // Use the saved prompt content
         if (!sectionResponse) {
             throw new Error(`Failed to generate steps for section: ${section}`);
         }

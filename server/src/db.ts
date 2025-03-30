@@ -41,17 +41,10 @@ export class DB {
     }
 
     async savePrompt(type: PromptType, content: string) {
-        const existingPrompt = await this.prisma.prompt.findFirst({
-            where: { type, content },
-        });
-        if (existingPrompt) {
-            return existingPrompt; // Return the existing prompt if it already exists
-        }
-        return await this.prisma.prompt.create({
-            data: {
-                type,
-                content,
-            },
+        return await this.prisma.prompt.upsert({
+            where: { type },
+            update: { content },
+            create: { type, content },
         });
     }
 

@@ -11,6 +11,11 @@ export class GPT {
 
     async generateResponse(prompt: string): Promise<string | null> {
         try {
+            // Modify the prompt to instruct GPT to avoid formatting JSON with ```json or similar
+            if (prompt.toLowerCase().includes("json")) {
+                prompt += "\nPlease provide only the JSON object without any formatting like ```json or similar.";
+            }
+
             const response = await this.client.chat.completions.create({
                 model: "gpt-4o-mini",
                 messages: [{ role: "user", content: prompt }],
