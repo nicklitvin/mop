@@ -17,11 +17,13 @@ export class DB {
             data: {
                 title: data.title,
                 description: data.description,
-                prerequisites: data.prerequisites,
+                prerequisites: data.prerequisites.map(prerequisite =>
+                    prerequisite.replace(/[\[\]]/g, "") // Remove square brackets
+                ),
                 steps: {
                     create: data.steps.map((step) => ({
                         stepNumber: step.stepNumber,
-                        action: step.action,
+                        action: step.action.replace(/[\[\]]/g, ""), // Remove square brackets
                     })),
                 },
             },

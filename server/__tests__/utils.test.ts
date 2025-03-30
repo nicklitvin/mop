@@ -20,8 +20,8 @@ describe("utils", () => {
     describe("updatePrerequisites", () => {
         it("should add missing tools to prerequisites", () => {
             const steps = [
-                { action: "use hammer" },
-                { action: "require screwdriver" }
+                { action: "Step 1: Prepare the workspace with [hammer]" },
+                { action: "Step 2: Tighten screws using [screwdriver]" }
             ];
             const prerequisites = ["wrench"];
             const result = updatePrerequisites(steps, prerequisites);
@@ -29,7 +29,7 @@ describe("utils", () => {
         });
 
         it("should not duplicate existing prerequisites", () => {
-            const steps = [{ action: "use wrench" }];
+            const steps = [{ action: "Step 1: Check the bolts with [wrench]" }];
             const prerequisites = ["wrench"];
             const result = updatePrerequisites(steps, prerequisites);
             expect(result).toEqual(["wrench"]);

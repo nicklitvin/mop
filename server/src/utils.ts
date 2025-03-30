@@ -4,15 +4,12 @@ export function updatePrerequisites(
     steps: Array<{ action: string }>,
     prerequisites: string[]
 ): string[] {
-    // Define specific words to look for when identifying tools or equipment
-    const toolKeywords = ["use", "require", "need"];
-
-    // Check if tools or equipment mentioned in steps are missing from prerequisites
+    // Identify tools wrapped in square brackets
     const requiredTools = steps
         .flatMap(step => 
-            step.action.match(new RegExp(`(?:${toolKeywords.join("|")}) (\\w+)`, "gi")) || []
+            step.action.match(/\[(\w+)\]/g) || []
         )
-        .map(match => match.replace(new RegExp(`(?:${toolKeywords.join("|")}) `, "i"), "").trim());
+        .map(match => match.replace(/[\[\]]/g, "").trim()); // Remove square brackets
 
     const updatedPrerequisites = new Set(prerequisites);
     requiredTools.forEach(tool => {
@@ -21,7 +18,7 @@ export function updatePrerequisites(
         }
     });
 
-    return Array.from(updatedPrerequisites);
+    return Array.from(updatedPrerequisites); // Return tools without square brackets
 }
 
 export async function validateSteps(
@@ -34,9 +31,12 @@ export async function validateSteps(
         ${steps.map((step, index) => `${index + 1}. ${step.action}`).join("\n")}
 
         Validate the following:
+        - Ensure each step is specific to a single action or physical item.
         - Ensure the steps are in a logical order.
         - Identify and remove any duplicate, unnecessary, or missing steps.
-        - Adjust the steps to make them clear and concise.
+        - Adjust the steps to make them clear, concise, and specific. For example:
+            - "Reconnect switches" -> "Plug cable X into port Y on switch Z."
+            - "Use console" -> "Run commands X, Y, Z in the terminal."
 
         Return the validated steps as a JSON array in the exact format below, with no additional text or markers:
         [
@@ -65,7 +65,7 @@ export async function generateGeneralMOPInfo(
         The MOP should include:
         - A title summarizing the procedure.
         - A concise, technical description of the procedure.
-        - A list of prerequisites required to perform the procedure.
+        - A list of prerequisites required to perform the procedure. Each prerequisite should be specific to a single physical item or tool, e.g., "[screwdriver]", "[network cable]".
         - General sections (not detailed steps) that outline the main parts of the procedure.
 
         Return the response as a JSON object in the exact format below, with no additional text or markers:
@@ -93,9 +93,10 @@ export async function generateDetailedSteps(
             You are creating detailed steps for a Methods of Procedure (MOP) for data center operations.
             The MOP is titled "${generalData.title}" and is described as follows: "${generalData.description}".
             Based on the section "${section}" of the MOP, generate a detailed list of steps.
-            Each step should include:
-            - A single, specific, and atomic action that can be easily verified.
-            - If a specific tool or equipment is needed, explicitly mention it and prefix it with one of the following words: "use", "require", or "need".
+            Each step should:
+            - Be specific to a single action or physical item.
+            - Include clear instructions, e.g., "Plug cable X into port Y on switch Z" or "Run commands X, Y, Z in the terminal."
+            - Assume the user has the correct permissions and knowledge, so there is no need to check for approvals or prerequisites.
 
             Return the response as a JSON array in the exact format below, with no additional text or markers:
             [
