@@ -2,6 +2,7 @@ import { API } from "./api";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
+import { PromptType } from "@prisma/client";
 
 export class Server {
     private api: API;
@@ -9,6 +10,7 @@ export class Server {
         hi: "/api/hi",
         createMOP: "/api/createMOP", // Updated URL
         getMOP: "/api/getMOP", // New URL
+        updatePrompt: "/api/updatePrompt", // New URL
     };
 
     constructor({ useBuild }: { useBuild: boolean }) {
@@ -34,6 +36,7 @@ export class Server {
         app.get(this.URLS.hi, this.hi.bind(this));
         app.post(this.URLS.createMOP, this.createMOP.bind(this)); // Updated URL usage
         app.get(this.URLS.getMOP, this.getMOP.bind(this)); // Add new endpoint
+        app.post(this.URLS.updatePrompt, this.updatePrompt.bind(this)); // Add new endpoint
     }
 
     async hi(req: Request, res: Response) {
@@ -73,6 +76,22 @@ export class Server {
             }
             const mop = await this.api.getMOP(id);
             return res.status(200).json(mop);
+        } catch (err) {
+            console.error(err); // Log the error
+            return res.status(500).json(err);
+        }
+    }
+
+    async updatePrompt(req: Request, res: Response) {
+        try {
+            const { comment }: { comment: string } = req.body;
+            if (!comment) {
+                return res.status(400).json({ message: "Comment is required" });
+            }
+
+            // Call the API to handle the update
+            const updatedPrompt = await this.api.updatePrompt({ comment });
+            return res.status(200).json(updatedPrompt);
         } catch (err) {
             console.error(err); // Log the error
             return res.status(500).json(err);

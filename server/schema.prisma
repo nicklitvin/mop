@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PromptType {
+  validation
+  generalInfo
+  detailedSteps
+}
+
 model MOP {
     id               Int       @id @default(autoincrement())
     title            String
@@ -16,6 +22,7 @@ model MOP {
     dateCreated      DateTime  @default(now())
     version          Int       @default(1)
     steps            Step[]
+    // changes          Change[]
 }
 
 model Step {
@@ -26,3 +33,25 @@ model Step {
 
     action           String
 }
+
+model Prompt {
+    id          Int        @id @default(autoincrement())
+    type        PromptType @unique // e.g., "validation", "general_info", "detailed_steps"
+    content     String     // The actual prompt text
+    dateCreated DateTime   @default(now())
+}
+
+// model Change {
+//     id          Int      @id @default(autoincrement())
+//     mopId       Int
+//     mop         MOP      @relation(fields: [mopId], references: [id])
+//     stepId      Int?     // Optional: Tracks changes specific to a Step
+//     step        Step?    @relation(fields: [stepId], references: [id])
+
+//     version     Int
+//     changeType  String   // e.g., "title_update", "step_added", "description_change"
+//     fieldName   String?  // e.g., "title", "stepNumber", "description"
+//     oldValue    Json?    // The value before the change (supports complex types like arrays).
+//     newValue    Json?    // The value after the change (supports complex types like arrays).
+//     timestamp   DateTime @default(now()) // When the change was made.
+// }

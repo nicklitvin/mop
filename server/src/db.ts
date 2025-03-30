@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, PromptType } from "@prisma/client"
 
 export class DB {
     private prisma: PrismaClient;
@@ -37,6 +37,38 @@ export class DB {
         return await this.prisma.mOP.findUnique({
             where: { id },
             include: { steps: true },
+        });
+    }
+
+    async savePrompt(type: PromptType, content: string) {
+        const existingPrompt = await this.prisma.prompt.findFirst({
+            where: { type, content },
+        });
+        if (existingPrompt) {
+            return existingPrompt; // Return the existing prompt if it already exists
+        }
+        return await this.prisma.prompt.create({
+            data: {
+                type,
+                content,
+            },
+        });
+    }
+
+    async getPromptByType(type: PromptType) {
+        return await this.prisma.prompt.findUnique({
+            where: { type },
+        });
+    }
+    
+    async getAllPrompts() {
+        return await this.prisma.prompt.findMany();
+    }
+
+    async updatePrompt(type: PromptType, newContent: string) {
+        return await this.prisma.prompt.update({
+            where: { type },
+            data: { content: newContent },
         });
     }
 }

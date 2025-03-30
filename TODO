@@ -1,0 +1,26 @@
+store changes in db changes model
+feedback loop?
+compliance?
+readme for setup
+
+# store
+# v1
+# step 1: 1
+# step 2: 2
+
+# v2
+# step 1: 1
+# step 2: 3
+
+# changes 
+# field type: step #
+# old val: 2
+# new val: 3
+
+# v3
+# step 1: 1
+
+# changes
+# field type: step #
+# old val: 3
+# new val: null
