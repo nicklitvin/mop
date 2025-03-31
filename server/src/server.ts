@@ -11,6 +11,8 @@ export class Server {
         getMOP: "/api/getMOP", // New URL
         updatePrompt: "/api/updatePrompt", // New URL
         lastMOP: "/api/lastMOP", // New URL
+        updateMOP: "/api/updateMOP", // New URL
+        getMOPVersion: "/api/getMOPVersion", // New URL
     };
 
     constructor({ useBuild }: { useBuild: boolean }) {
@@ -38,6 +40,8 @@ export class Server {
         app.get(this.URLS.getMOP, this.getMOP.bind(this)); // Add new endpoint
         app.post(this.URLS.updatePrompt, this.updatePrompt.bind(this)); // Add new endpoint
         app.get(this.URLS.lastMOP, this.getLastMOP.bind(this)); // Add new endpoint
+        app.post(this.URLS.updateMOP, this.updateMOP.bind(this)); // Add new endpoint
+        app.get(this.URLS.getMOPVersion, this.getMOPVersion.bind(this)); // Add new endpoint
     }
 
     async hi(req: Request, res: Response) {
@@ -105,6 +109,40 @@ export class Server {
             return res.status(lastMOP.message ? 400 : 200).json(lastMOP);
         } catch (err) {
             console.error(err); // Log the error
+            return res.status(500).json(err);
+        }
+    }
+
+    async updateMOP(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.body.id, 10);
+            const prompt = req.body.prompt;
+
+            if (!id || !prompt) {
+                return res.status(400).json({ message: "Invalid request data" });
+            }
+
+            const result = await this.api.updateMOP({ id, prompt });
+            return res.status(result.message ? 400 : 200).json(result);
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json(err);
+        }
+    }
+
+    async getMOPVersion(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.query.id as string, 10);
+            const version = parseInt(req.query.version as string, 10);
+
+            if (isNaN(id) || isNaN(version)) {
+                return res.status(400).json({ message: "ID and version must be numbers" });
+            }
+
+            const result = await this.api.getMOPVersion({ id, version });
+            return res.status(result.message ? 400 : 200).json(result);
+        } catch (err) {
+            console.error(err);
             return res.status(500).json(err);
         }
     }

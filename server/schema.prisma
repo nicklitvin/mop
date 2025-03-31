@@ -16,6 +16,7 @@ model MOP {
     dateCreated      DateTime  @default(now())
     version          Int       @default(1)
     steps            Step[]
+    changes          Change[]
 }
 
 model Step {
@@ -32,4 +33,14 @@ model Prompt {
     type        String   @unique 
     content     String   
     dateCreated DateTime @default(now())
+}
+
+model Change {
+    id          Int       @id @default(autoincrement())
+    mopId       Int
+    mop         MOP       @relation(fields: [mopId], references: [id])
+    field       String    // Field that was changed (e.g., "title", "description", "steps")
+    oldValue    String    // Previous value
+    newValue    String    // Updated value
+    dateChanged DateTime  @default(now())
 }

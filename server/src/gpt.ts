@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import * as fs from "node:fs"
+import * as fs from "node:fs";
 import * as path from "path";
 
 export class GPT {

@@ -6,12 +6,15 @@ import { Button } from "../components/ui/button";
 import { MOP, Step } from "../lib/types";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/table";
 import { toast } from "sonner"; // Import toast for notifications
+import { Input } from "../components/ui/input"; // Import ShadCN Input
 
 export function MOPPage() {
     const [searchParams] = useSearchParams();
     const [mopData, setMopData] = useState<MOP | null>(null);
     const [comment, setComment] = useState(""); // State for input box
     const [isSubmitting, setIsSubmitting] = useState(false); // State for submission loading
+    const [selectedVersion, setSelectedVersion] = useState<number | null>(null); // State for version selection
+    const [updatedMOP, setUpdatedMOP] = useState(""); // State for MOP update
     const navigate = useNavigate();
     const mopId = searchParams.get("id");
 
@@ -53,6 +56,47 @@ export function MOPPage() {
             }
         } finally {
             setIsSubmitting(false); // Reset loading state
+        }
+    };
+
+    const handleVersionChange = async () => {
+        if (selectedVersion === null || isNaN(selectedVersion)) {
+            toast("Please select a valid version.");
+            return;
+        }
+
+        const data = await callAPI<MOP>({
+            method: "GET",
+            url: "/getMOPVersion",
+            payload: { id: mopId, version: selectedVersion },
+        });
+
+        if (data) {
+            setMopData(data);
+        }
+    };
+
+    const handleMOPUpdate = async () => {
+        if (!updatedMOP.trim()) {
+            toast("Updated MOP content cannot be empty.");
+            return;
+        }
+
+        const response = await callAPI({
+            method: "POST",
+            url: "/updateMOP",
+            payload: { id: mopId, prompt: updatedMOP },
+        });
+
+        if (response) {
+            toast("MOP updated successfully!");
+            setUpdatedMOP(""); // Clear input box
+        }
+    };
+
+    const handleVersionIncrement = (increment: number) => {
+        if (selectedVersion !== null) {
+            setSelectedVersion((prev) => (prev ?? 0) + increment);
         }
     };
 
@@ -121,13 +165,50 @@ export function MOPPage() {
                     </Table>
                 </div>
 
+                {/* Select Version */}
+                <div className="space-y-2 border border-gray-300 rounded-lg p-4">
+                    <h2 className="font-bold text-lg">Select MOP Version</h2>
+                    <div className="flex items-center space-x-2">
+                        <Button onClick={() => handleVersionIncrement(-1)} className="w-10">
+                            {"<"}
+                        </Button>
+                        <Input
+                            type="number"
+                            value={selectedVersion ?? ""}
+                            onChange={(e) => setSelectedVersion(parseInt(e.target.value, 10))}
+                            className="w-full"
+                            placeholder="Enter version number"
+                        />
+                        <Button onClick={() => handleVersionIncrement(1)} className="w-10">
+                            {">"}
+                        </Button>
+                    </div>
+                    <Button onClick={handleVersionChange} className="w-36">
+                        Load Version
+                    </Button>
+                </div>
+
+                {/* Update MOP */}
+                <div className="space-y-2 border border-gray-300 rounded-lg p-4">
+                    <h2 className="font-bold text-lg">Update MOP</h2>
+                    <Input
+                        value={updatedMOP}
+                        onChange={(e) => setUpdatedMOP(e.target.value)}
+                        className="w-full"
+                        placeholder="Enter updated MOP content here..."
+                    />
+                    <Button onClick={handleMOPUpdate} className="w-36">
+                        Update MOP
+                    </Button>
+                </div>
+
                 {/* Add Comment */}
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">
                     <h2 className="font-bold text-lg">Provide Feedback</h2>
-                    <textarea
+                    <Input
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-2"
+                        className="w-full"
                         placeholder="Enter your feedback here..."
                     />
                     <Button onClick={handleSubmit} disabled={isSubmitting} className="w-36">

@@ -169,3 +169,40 @@ export async function generateUpdatedPrompt(
     `;
     return await gpt.generateResponse(feedbackPrompt);
 }
+
+export async function generateMOPChanges(
+    gpt: GPT,
+    existingMOP: any,
+    userPrompt: string
+): Promise<{ field: string; oldValue: string; newValue: string; stepNumber?: number }[]> {
+    const changesPrompt = `
+        You are tasked with updating a Methods of Procedure (MOP) based on the user's input.
+        The current MOP is as follows:
+        Title: "${existingMOP.title}"
+        Description: "${existingMOP.description}"
+        Prerequisites: ${JSON.stringify(existingMOP.prerequisites)}
+        Steps:
+        ${existingMOP.steps.map((step: any) => `${step.stepNumber}. ${step.action}`).join("\n")}
+
+        User's input:
+        "${userPrompt}"
+
+        Based on the user's input, determine the necessary changes to the MOP. 
+        For each change, specify:
+        - The field being updated (e.g., "title", "description", "prerequisites", or "steps").
+        - The old value of the field.
+        - The new value for the field.
+        - If the change is for a specific step, include the step number.
+
+        Return the changes as a JSON array in the following format:
+        [
+            { "field": "string", "oldValue": "string", "newValue": "string", "stepNumber": number (optional) },
+            ...
+        ]
+    `;
+    const response = await gpt.generateResponse(changesPrompt);
+    if (!response) {
+        throw new Error("Failed to generate MOP changes using GPT.");
+    }
+    return JSON.parse(response);
+}

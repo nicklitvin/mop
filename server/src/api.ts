@@ -2,7 +2,7 @@ import { APIOutput, MOPInput, PromptType, OutputMOP } from "./types";
 import { DB } from "./db";
 import { MOP } from "@prisma/client";
 import { GPT } from "./gpt";
-import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps, deducePromptType, generateUpdatedPrompt } from "./utils";
+import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps, deducePromptType, generateUpdatedPrompt, generateMOPChanges } from "./utils";
 
 export class API {
     public db: DB;
@@ -73,6 +73,17 @@ export class API {
         };
     }
 
+    async getMOPVersion(input: { id: number; version: number }): Promise<APIOutput<OutputMOP>> {
+        const { id, version } = input;
+
+        const mop = await this.db.getMOPVersion(id, version);
+        if (!mop) {
+            return { message: "MOP not found or version not available" };
+        }
+
+        return { data: mop };
+    }
+
     async updatePrompt(input: { comment: string }): Promise<APIOutput<{ type: PromptType; content: string }>> {
         const { comment } = input;
 
@@ -98,5 +109,32 @@ export class API {
         const updatedPrompt = await this.db.updatePrompt(type, newPromptContent);
 
         return { data: { type, content: updatedPrompt.content } };
+    }
+
+    async updateMOP(input: { id: number; prompt: string }): Promise<APIOutput<OutputMOP>> {
+        const { id, prompt } = input;
+
+        // Step 1: Retrieve the existing MOP from the database
+        const existingMOP = await this.db.getMOP(id);
+        if (!existingMOP) {
+            return { message: "MOP not found" };
+        }
+
+        // Step 2: Generate updates using the utility function
+        const updates = await generateMOPChanges(this.gpt, existingMOP, prompt);
+        if (!updates || updates.length === 0) {
+            return { message: "No updates generated for the MOP" };
+        }
+
+        // Step 3: Apply updates and save changes
+        await this.db.updateMOP(id, updates);
+
+        // Step 4: Fetch the updated MOP
+        const updatedMOP = await this.db.getMOP(id);
+        if (!updatedMOP) {
+            return { message: "Failed to fetch updated MOP" };
+        }
+
+        return { data: updatedMOP };
     }
 }
