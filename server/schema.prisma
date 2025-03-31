@@ -11,12 +11,11 @@ model MOP {
     id               Int       @id @default(autoincrement())
     title            String
     description      String
-    prerequisites    String    // Changed from String[] to String (comma-separated)
+    prerequisites    String  
 
     dateCreated      DateTime  @default(now())
     version          Int       @default(1)
     steps            Step[]
-    // changes          Change[]
 }
 
 model Step {
@@ -30,7 +29,7 @@ model Step {
 
 model Prompt {
     id          Int      @id @default(autoincrement())
-    type        String   @unique // Changed from PromptType to String
-    content     String   // The actual prompt text
+    type        String   @unique 
+    content     String   
     dateCreated DateTime @default(now())
 }

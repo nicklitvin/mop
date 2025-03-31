@@ -11,6 +11,7 @@ export function MOPPage() {
     const [searchParams] = useSearchParams();
     const [mopData, setMopData] = useState<MOP | null>(null);
     const [comment, setComment] = useState(""); // State for input box
+    const [isSubmitting, setIsSubmitting] = useState(false); // State for submission loading
     const navigate = useNavigate();
     const mopId = searchParams.get("id");
 
@@ -38,15 +39,20 @@ export function MOPPage() {
             return;
         }
 
-        const response = await callAPI({
-            method: "POST",
-            url: "/updatePrompt",
-            payload: { comment },
-        });
+        setIsSubmitting(true); // Set loading state
+        try {
+            const response = await callAPI({
+                method: "POST",
+                url: "/updatePrompt",
+                payload: { comment },
+            });
 
-        if (response) {
-            toast("Submission successful!");
-            setComment(""); // Clear input box
+            if (response) {
+                toast("Submission successful!");
+                setComment(""); // Clear input box
+            }
+        } finally {
+            setIsSubmitting(false); // Reset loading state
         }
     };
 
@@ -124,8 +130,8 @@ export function MOPPage() {
                         className="w-full border border-gray-300 rounded-lg p-2"
                         placeholder="Enter your feedback here..."
                     />
-                    <Button onClick={handleSubmit} className="w-36">
-                        Submit
+                    <Button onClick={handleSubmit} disabled={isSubmitting} className="w-36">
+                        {isSubmitting ? <LoadingSpinner /> : "Submit"}
                     </Button>
                 </div>
 

@@ -2,11 +2,11 @@ import { APIOutput, MOPInput, PromptType, OutputMOP } from "./types";
 import { DB } from "./db";
 import { MOP } from "@prisma/client";
 import { GPT } from "./gpt";
-import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps, deducePromptType } from "./utils";
+import { updatePrerequisites, validateSteps, generateGeneralMOPInfo, generateDetailedSteps, deducePromptType, generateUpdatedPrompt } from "./utils";
 
 export class API {
-    private db: DB;
-    private gpt: GPT;
+    public db: DB;
+    public gpt: GPT;
 
     constructor() {
         this.db = new DB();
@@ -89,17 +89,7 @@ export class API {
         }
 
         // Step 3: Generate a new prompt based on the user's comment
-        const feedbackPrompt = `
-            You are tasked with improving the following prompt based on user feedback.
-            Original prompt:
-            "${existingPrompt.content}"
-
-            User feedback:
-            "${comment}"
-
-            Return the updated prompt as plain text with no additional text or markers.
-        `;
-        const newPromptContent = await this.gpt.generateResponse(feedbackPrompt);
+        const newPromptContent = await generateUpdatedPrompt(this.gpt, existingPrompt.content, comment);
         if (!newPromptContent) {
             throw new Error("Failed to generate updated prompt using GPT.");
         }

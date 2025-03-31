@@ -151,3 +151,21 @@ export async function deducePromptType(gpt: GPT, comment: string): Promise<Promp
     }
     return response.trim() as PromptType;
 }
+
+export async function generateUpdatedPrompt(
+    gpt: GPT,
+    existingPromptContent: string,
+    comment: string
+): Promise<string> {
+    const feedbackPrompt = `
+        You are tasked with improving the following prompt based on user feedback.
+        Original prompt:
+        "${existingPromptContent}"
+
+        User feedback:
+        "${comment}"
+
+        Return the updated prompt as plain text with no additional text or markers.
+    `;
+    return await gpt.generateResponse(feedbackPrompt);
+}

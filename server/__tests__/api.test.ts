@@ -1,61 +1,72 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { API } from "../src/api";
-import testLog from "../logs/test_log.json"; // Ensure --resolveJsonModule is enabled in tsconfig
+import { GPT } from "../src/gpt";
+import { DB } from "../src/db";
+
+vi.mock("../src/gpt", () => {
+    return {
+        GPT: vi.fn().mockImplementation(() => ({
+            generateResponse: vi.fn().mockResolvedValue(null) // Default mock to prevent actual requests
+        }))
+    };
+});
+
+vi.mock("../src/db", () => {
+    return {
+        DB: vi.fn().mockImplementation(() => ({
+            createMOP: vi.fn(),
+            getMOP: vi.fn(),
+            getPromptByType: vi.fn(),
+            updatePrompt: vi.fn(),
+            savePrompt: vi.fn().mockResolvedValue({ content: "mocked prompt content" }) // Ensure savePrompt returns valid content
+        }))
+    };
+});
 
 describe("API Class", () => {
     let api: API;
-    let mockDB: { createMOP: ReturnType<typeof vi.fn>; getMOP: ReturnType<typeof vi.fn> }; // Properly type mockDB
-    let mockGPT: { generateResponse: ReturnType<typeof vi.fn> }; // Properly type mockGPT
 
     beforeEach(() => {
-        mockDB = {
-            createMOP: vi.fn(), // Mock the createMOP method
-            getMOP: vi.fn(), // Mock the getMOP method
-        };
-
-        mockGPT = {
-            generateResponse: vi.fn(), // Mock the generateResponse method
-        };
-
         api = new API();
-        (api as any).db = mockDB;
-        (api as any).gpt = mockGPT;
+        api.db = new DB(); // Use the mocked DB instance
+        api.gpt = new GPT(); // Use the mocked GPT instance
     });
 
-    it("should create a MOP and save it to the database", async () => {
-        // Mock GPT responses using test_log.json outputs
-        let gptCallIndex = 0;
-        mockGPT.generateResponse.mockImplementation(() => {
-            const response = testLog.outputs[gptCallIndex];
-            gptCallIndex++;
-            return Promise.resolve(response);
-        });
+    it("should update a prompt in the database", async () => {
+        // Define input and expected values
+        const comment = "Make the prompt more concise.";
+        const promptType = "generalInfo";
 
-        // Mock input
-        const input = {
-            prompt: "Network switch upgrades",
-            difficultyLevel: "Medium",
-            riskAssessment: "Medium",
-            context: "Upgrading network switches in a data center",
+        const existingPrompt = {
+            type: promptType,
+            content: "Original prompt content.",
+            id: 1,
+            dateCreated: new Date(),
         };
 
-        // Mock DB response
-        mockDB.createMOP.mockImplementation(async (data) => ({
-            ...data,
-            id: 1,
-            steps: data.steps.map((step, index) => ({
-                ...step,
-                id: index + 1,
-                notes: [],
-                mopId: 1,
-            })),
-        }));
+        const updatedPromptContent = "Updated prompt content.";
 
-        // Call createMOP
-        const result = await api.createMOP(input);
+        // Mock GPT and DB responses
+        vi.mocked(api.gpt.generateResponse).mockResolvedValueOnce(promptType); // Deduce prompt type
+        vi.mocked(api.db.getPromptByType).mockResolvedValueOnce(existingPrompt); // Retrieve existing prompt
+        vi.mocked(api.gpt.generateResponse).mockResolvedValueOnce(updatedPromptContent); // Generate updated prompt
+        vi.mocked(api.db.updatePrompt).mockResolvedValueOnce({
+            type: promptType,
+            content: updatedPromptContent,
+            id: existingPrompt.id,
+            dateCreated: existingPrompt.dateCreated,
+        }); // Update prompt in DB
+
+        // Call updatePrompt
+        const result = await api.updatePrompt({ comment });
 
         // Assertions
-        expect(mockGPT.generateResponse).toHaveBeenCalledTimes(testLog.outputs.length);
-        // console.log(result.data.prerequisites);
+        expect(api.db.getPromptByType).toHaveBeenCalledWith(promptType);
+        expect(api.gpt.generateResponse).toHaveBeenCalledWith(expect.stringContaining(comment));
+        expect(api.db.updatePrompt).toHaveBeenCalledWith(promptType, updatedPromptContent);
+        expect(result.data).toEqual({
+            type: promptType,
+            content: updatedPromptContent,
+        });
     });
 });
