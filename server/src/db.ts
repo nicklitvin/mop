@@ -132,7 +132,7 @@ export class DB {
                 // Update the step
                 await this.prisma.step.updateMany({
                     where: { mopId: id, stepNumber },
-                    data: { [field]: newValue }, // Use dynamic key assignment
+                    data: { action: newValue }, // Use dynamic key assignment
                 });
             } else {
                 // Handle MOP-level updates
@@ -164,7 +164,7 @@ export class DB {
         }
 
         if (mop.version === targetVersion) {
-            return mop; // Already at the target version
+            return { ...mop, version: targetVersion }; // Return the requested version
         }
 
         // Fetch all changes for the MOP, ordered by most recent first
@@ -206,6 +206,13 @@ export class DB {
             currentVersion--; // Decrement the version after applying a change
         }
 
-        return downgradedMOP;
+        return { ...downgradedMOP, version: targetVersion }; // Ensure the returned MOP reflects the requested version
+    }
+
+    async getMOPChanges(mopId: number) {
+        return await this.prisma.change.findMany({
+            where: { mopId },
+            orderBy: { targetVersion: "asc" }, // Order changes by version
+        });
     }
 }

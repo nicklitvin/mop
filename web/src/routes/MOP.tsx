@@ -15,6 +15,7 @@ export function MOPPage() {
     const [selectedVersion, setSelectedVersion] = useState<number | null>(null); // State for version selection
     const [updatedMOP, setUpdatedMOP] = useState(""); // State for MOP update
     const [loadingButton, setLoadingButton] = useState<string | null>(null); // Track which button is loading
+    const [changes, setChanges] = useState<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[] | null>(null); // State for changes
     const navigate = useNavigate();
     const mopId = searchParams.get("id");
 
@@ -36,6 +37,31 @@ export function MOPPage() {
         fetchMOP();
     }, [mopId]);
 
+    useEffect(() => {
+        const fetchChanges = async () => {
+            if (mopId) {
+                const id = parseInt(mopId, 10);
+                if (!isNaN(id)) {
+                    const data = await callAPI<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[]>({
+                        method: "GET",
+                        url: "/getMOPChanges",
+                        payload: { id },
+                    });
+                    setChanges(data);
+                }
+            }
+        };
+        fetchChanges();
+    }, [mopId]);
+
+    const groupedChanges = changes?.reduce((acc, change) => {
+        if (!acc[change.version]) {
+            acc[change.version] = [];
+        }
+        acc[change.version].push(`${change.field}: ${change.oldValue} -> ${change.newValue}`);
+        return acc;
+    }, {} as Record<number, string[]>);
+
     const handleSubmit = async () => {
         if (!comment.trim()) {
             toast("Comment cannot be empty.");
@@ -51,7 +77,7 @@ export function MOPPage() {
             });
 
             if (response) {
-                toast("Submission successful!");
+                toast("Feedback accepted successfully!"); // Show success toast
                 setComment(""); // Clear input box
             }
         } finally {
@@ -75,6 +101,8 @@ export function MOPPage() {
 
             if (data) {
                 setMopData(data);
+                toast("Version changed successfully!"); // Show success toast
+                setSelectedVersion(null); // Clear input box
             }
         } finally {
             setLoadingButton(null); // Reset loading state
@@ -168,6 +196,35 @@ export function MOPPage() {
                         </TableBody>
                     </Table>
                 </div>
+
+                {/* Changes Table */}
+                {groupedChanges && Object.keys(groupedChanges).length > 0 && (
+                    <div className="space-y-2 border border-gray-300 rounded-lg p-4">
+                        <h2 className="font-bold text-lg">Change History</h2>
+                        <Table className="w-full">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-1/4">Version</TableHead>
+                                    <TableHead className="w-3/4">Changes</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {Object.entries(groupedChanges).map(([version, changes]) => (
+                                    <TableRow key={version}>
+                                        <TableCell className="w-1/4">{version}</TableCell>
+                                        <TableCell className="w-3/4">
+                                            <ul className="list-disc pl-5">
+                                                {changes.map((change, index) => (
+                                                    <li key={index}>{change}</li>
+                                                ))}
+                                            </ul>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )}
 
                 {/* Select Version */}
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">

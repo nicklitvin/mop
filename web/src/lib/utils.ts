@@ -12,7 +12,7 @@ const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL
 })
 
-export type URL = "/hi" | "/createMOP" | "/getMOP" | "/updatePrompt" | "/lastMOP" | "/updateMOP" | "/getMOPVersion"; 
+export type URL = "/hi" | "/createMOP" | "/getMOP" | "/updatePrompt" | "/lastMOP" | "/updateMOP" | "/getMOPVersion" | "/getMOPChanges"; 
 
 export const callAPI = async <T>({ method, url, payload } : {
     method: "GET" | "POST",

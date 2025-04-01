@@ -13,6 +13,7 @@ export class Server {
         lastMOP: "/api/lastMOP", // New URL
         updateMOP: "/api/updateMOP", // New URL
         getMOPVersion: "/api/getMOPVersion", // New URL
+        getMOPChanges: "/api/getMOPChanges", // New URL
     };
 
     constructor({ useBuild }: { useBuild: boolean }) {
@@ -42,6 +43,7 @@ export class Server {
         app.get(this.URLS.lastMOP, this.getLastMOP.bind(this)); // Add new endpoint
         app.post(this.URLS.updateMOP, this.updateMOP.bind(this)); // Add new endpoint
         app.get(this.URLS.getMOPVersion, this.getMOPVersion.bind(this)); // Add new endpoint
+        app.get(this.URLS.getMOPChanges, this.getMOPChanges.bind(this)); // Add new endpoint
     }
 
     async hi(req: Request, res: Response) {
@@ -141,6 +143,21 @@ export class Server {
 
             const result = await this.api.getMOPVersion({ id, version });
             return res.status(result.message ? 400 : 200).json(result);
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json(err);
+        }
+    }
+
+    async getMOPChanges(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.query.id as string, 10);
+            if (isNaN(id)) {
+                return res.status(400).json({ message: "ID must be a number" });
+            }
+
+            const changes = await this.api.getMOPChanges(id);
+            return res.status(changes.message ? 400 : 200).json(changes);
         } catch (err) {
             console.error(err);
             return res.status(500).json(err);

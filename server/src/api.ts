@@ -150,4 +150,22 @@ export class API {
 
         return { data: updatedMOP };
     }
+
+    async getMOPChanges(id: number): Promise<APIOutput<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[]>> {
+        const changes = await this.db.getMOPChanges(id);
+        if (!changes || changes.length === 0) {
+            return { message: "No changes found for the specified MOP ID" };
+        }
+
+        // Map database result to expected output format
+        const formattedChanges = changes.map(change => ({
+            version: change.targetVersion, // Map targetVersion to version
+            field: change.field,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+            stepNumber: change.stepNumber,
+        }));
+
+        return { data: formattedChanges };
+    }
 }
