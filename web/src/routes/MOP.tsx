@@ -12,9 +12,9 @@ export function MOPPage() {
     const [searchParams] = useSearchParams();
     const [mopData, setMopData] = useState<MOP | null>(null);
     const [comment, setComment] = useState(""); // State for input box
-    const [isSubmitting, setIsSubmitting] = useState(false); // State for submission loading
     const [selectedVersion, setSelectedVersion] = useState<number | null>(null); // State for version selection
     const [updatedMOP, setUpdatedMOP] = useState(""); // State for MOP update
+    const [loadingButton, setLoadingButton] = useState<string | null>(null); // Track which button is loading
     const navigate = useNavigate();
     const mopId = searchParams.get("id");
 
@@ -42,7 +42,7 @@ export function MOPPage() {
             return;
         }
 
-        setIsSubmitting(true); // Set loading state
+        setLoadingButton("submit"); // Set loading state for submit button
         try {
             const response = await callAPI({
                 method: "POST",
@@ -55,7 +55,7 @@ export function MOPPage() {
                 setComment(""); // Clear input box
             }
         } finally {
-            setIsSubmitting(false); // Reset loading state
+            setLoadingButton(null); // Reset loading state
         }
     };
 
@@ -65,14 +65,19 @@ export function MOPPage() {
             return;
         }
 
-        const data = await callAPI<MOP>({
-            method: "GET",
-            url: "/getMOPVersion",
-            payload: { id: mopId, version: selectedVersion },
-        });
+        setLoadingButton("versionChange"); // Set loading state for version change button
+        try {
+            const data = await callAPI<MOP>({
+                method: "GET",
+                url: "/getMOPVersion",
+                payload: { id: mopId, version: selectedVersion },
+            });
 
-        if (data) {
-            setMopData(data);
+            if (data) {
+                setMopData(data);
+            }
+        } finally {
+            setLoadingButton(null); // Reset loading state
         }
     };
 
@@ -82,21 +87,20 @@ export function MOPPage() {
             return;
         }
 
-        const response = await callAPI({
-            method: "POST",
-            url: "/updateMOP",
-            payload: { id: mopId, prompt: updatedMOP },
-        });
+        setLoadingButton("updateMOP"); // Set loading state for update MOP button
+        try {
+            const response = await callAPI({
+                method: "POST",
+                url: "/updateMOP",
+                payload: { id: mopId, prompt: updatedMOP },
+            });
 
-        if (response) {
-            toast("MOP updated successfully!");
-            setUpdatedMOP(""); // Clear input box
-        }
-    };
-
-    const handleVersionIncrement = (increment: number) => {
-        if (selectedVersion !== null) {
-            setSelectedVersion((prev) => (prev ?? 0) + increment);
+            if (response) {
+                toast("MOP updated successfully!");
+                setUpdatedMOP(""); // Clear input box
+            }
+        } finally {
+            setLoadingButton(null); // Reset loading state
         }
     };
 
@@ -169,9 +173,6 @@ export function MOPPage() {
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">
                     <h2 className="font-bold text-lg">Select MOP Version</h2>
                     <div className="flex items-center space-x-2">
-                        <Button onClick={() => handleVersionIncrement(-1)} className="w-10">
-                            {"<"}
-                        </Button>
                         <Input
                             type="number"
                             value={selectedVersion ?? ""}
@@ -179,12 +180,9 @@ export function MOPPage() {
                             className="w-full"
                             placeholder="Enter version number"
                         />
-                        <Button onClick={() => handleVersionIncrement(1)} className="w-10">
-                            {">"}
-                        </Button>
                     </div>
-                    <Button onClick={handleVersionChange} className="w-36">
-                        Load Version
+                    <Button onClick={handleVersionChange} disabled={loadingButton === "versionChange"} className="w-36">
+                        {loadingButton === "versionChange" ? <LoadingSpinner /> : "Load Version"}
                     </Button>
                 </div>
 
@@ -197,8 +195,8 @@ export function MOPPage() {
                         className="w-full"
                         placeholder="Enter updated MOP content here..."
                     />
-                    <Button onClick={handleMOPUpdate} className="w-36">
-                        Update MOP
+                    <Button onClick={handleMOPUpdate} disabled={loadingButton === "updateMOP"} className="w-36">
+                        {loadingButton === "updateMOP" ? <LoadingSpinner /> : "Update MOP"}
                     </Button>
                 </div>
 
@@ -211,8 +209,8 @@ export function MOPPage() {
                         className="w-full"
                         placeholder="Enter your feedback here..."
                     />
-                    <Button onClick={handleSubmit} disabled={isSubmitting} className="w-36">
-                        {isSubmitting ? <LoadingSpinner /> : "Submit"}
+                    <Button onClick={handleSubmit} disabled={loadingButton === "submit"} className="w-36">
+                        {loadingButton === "submit" ? <LoadingSpinner /> : "Submit"}
                     </Button>
                 </div>
 

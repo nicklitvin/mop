@@ -126,7 +126,20 @@ export class API {
             return { message: "No updates generated for the MOP" };
         }
 
-        // Step 3: Apply updates and save changes
+        const newVersion = existingMOP.version + 1; // Calculate the new version
+
+        // Apply updates and save changes
+        for (const update of updates) {
+            await this.db.saveChange(
+                id,
+                update.field,
+                update.oldValue,
+                update.newValue,
+                newVersion,
+                update.stepNumber // Pass stepNumber if available
+            );
+        }
+
         await this.db.updateMOP(id, updates);
 
         // Step 4: Fetch the updated MOP

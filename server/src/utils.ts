@@ -1,6 +1,6 @@
 import { GPT } from "./gpt";
 import { DB } from "./db";
-import { PromptType } from "./types"; // Updated import to use the TypeScript type
+import { PromptType, ChangeType } from "./types"; // Updated import to include ChangeType
 
 export function updatePrerequisites(
     steps: Array<{ action: string }>,
@@ -174,13 +174,13 @@ export async function generateMOPChanges(
     gpt: GPT,
     existingMOP: any,
     userPrompt: string
-): Promise<{ field: string; oldValue: string; newValue: string; stepNumber?: number }[]> {
+): Promise<{ field: ChangeType; oldValue: string; newValue: string; stepNumber?: number }[]> {
     const changesPrompt = `
         You are tasked with updating a Methods of Procedure (MOP) based on the user's input.
         The current MOP is as follows:
         Title: "${existingMOP.title}"
         Description: "${existingMOP.description}"
-        Prerequisites: ${JSON.stringify(existingMOP.prerequisites)}
+        Prerequisites: "${existingMOP.prerequisites}" // Items are separated by '|'
         Steps:
         ${existingMOP.steps.map((step: any) => `${step.stepNumber}. ${step.action}`).join("\n")}
 
@@ -189,10 +189,12 @@ export async function generateMOPChanges(
 
         Based on the user's input, determine the necessary changes to the MOP. 
         For each change, specify:
-        - The field being updated (e.g., "title", "description", "prerequisites", or "steps").
-        - The old value of the field.
-        - The new value for the field.
+        - The field being updated. The field must be one of the following types: "title", "description", "prerequisites", or "steps".
+        - The old value of the field. If the field is "prerequisites", the old value must be a single string with items separated by '|'.
+        - The new value for the field. If the field is "prerequisites", the new value must also be a single string with items separated by '|'.
         - If the change is for a specific step, include the step number.
+
+        Ensure the "field" value strictly matches one of the valid types defined above.
 
         Return the changes as a JSON array in the following format:
         [
@@ -204,5 +206,5 @@ export async function generateMOPChanges(
     if (!response) {
         throw new Error("Failed to generate MOP changes using GPT.");
     }
-    return JSON.parse(response);
+    return JSON.parse(response) as { field: ChangeType; oldValue: string; newValue: string; stepNumber?: number }[];
 }

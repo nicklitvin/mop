@@ -42,5 +42,7 @@ model Change {
     field       String    // Field that was changed (e.g., "title", "description", "steps")
     oldValue    String    // Previous value
     newValue    String    // Updated value
+    stepNumber  Int?      // Step number for step-specific changes (optional)
     dateChanged DateTime  @default(now())
+    targetVersion Int     // Version being upgraded to
 }
