@@ -122,19 +122,6 @@ export class API {
 
         // Step 2: Generate updates using the utility function
         const updates = await generateMOPChanges(this.gpt, existingMOP, prompt);
-        // const updates = [
-        //     {
-        //         field: 'prerequisites' as ChangeType,
-        //         oldValue: 'NEW NETWORK SWITCHES,SCREWDRIVER,NETWORK CABLES,PATCH PANELS,CABLE TIES,LABELING TOOLS,BACKUP CONFIGURATION SOFTWARE,ACCESS TO MANAGEMENT INTERFACES',
-        //         newValue: 'TEST'
-        //     },
-        //     {
-        //         field: "steps" as ChangeType,
-        //         oldValue: "OLD VALUE",
-        //         newValue: "NEW VALUE",
-        //         stepNumber: 1 // Specify the step number for the update
-        //     }
-        // ]
         if (!updates || updates.length === 0) {
             return { message: "No updates generated for the MOP" };
         }

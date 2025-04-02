@@ -109,6 +109,29 @@ export function MOPPage() {
         }
     };
 
+    const handlePreviousVersion = async () => {
+        if (!mopData || mopData.version <= 1) {
+            toast("No previous version available.");
+            return;
+        }
+
+        setLoadingButton("previousVersion"); // Set loading state for previous version button
+        try {
+            const data = await callAPI<MOP>({
+                method: "GET",
+                url: "/getMOPVersion",
+                payload: { id: mopId, version: mopData.version - 1 },
+            });
+
+            if (data) {
+                setMopData(data);
+                toast("Previous version loaded successfully!"); // Show success toast
+            }
+        } finally {
+            setLoadingButton(null); // Reset loading state
+        }
+    };
+
     const handleMOPUpdate = async () => {
         if (!updatedMOP.trim()) {
             toast("Updated MOP content cannot be empty.");
@@ -239,10 +262,13 @@ export function MOPPage() {
                             className="w-full"
                             placeholder="Enter version number"
                         />
+                        <Button onClick={handleVersionChange} disabled={loadingButton === "versionChange"} className="w-36">
+                            {loadingButton === "versionChange" ? <LoadingSpinner /> : "Load Version"}
+                        </Button>
+                        <Button onClick={handlePreviousVersion} disabled={loadingButton === "previousVersion"} className="w-36">
+                            {loadingButton === "previousVersion" ? <LoadingSpinner /> : "Previous Version"}
+                        </Button>
                     </div>
-                    <Button onClick={handleVersionChange} disabled={loadingButton === "versionChange"} className="w-36">
-                        {loadingButton === "versionChange" ? <LoadingSpinner /> : "Load Version"}
-                    </Button>
                 </div>
 
                 {/* Update MOP */}

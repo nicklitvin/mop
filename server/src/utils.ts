@@ -191,14 +191,14 @@ export async function generateMOPChanges(
         For each change, specify:
         - The field being updated. The field must be one of the following types: "title", "description", "prerequisites", or "steps".
         - The old value of the field. If the field is "prerequisites", the old value must be a single string with items separated by '|'.
-        - The new value for the field. If the field is "prerequisites", the new value must also be a single string with items separated by '|'.
-        - If the change is for a specific step, include the step number.
+        - The new value for the field. If the field is "prerequisites", the new value must also be a single string with items separated by '|'. The step number must not be included in the new value string.
+        - If the change is for a specific step, include the step number. Otherwise, do not include the step number.
 
         Ensure the "field" value strictly matches one of the valid types defined above.
 
         Return the changes as a JSON array in the following format:
         [
-            { "field": "string", "oldValue": "string", "newValue": "string", "stepNumber": number (optional) },
+            { "field": "string", "oldValue": "string", "newValue": "string", "stepNumber": number|undefined },
             ...
         ]
     `;

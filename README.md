@@ -13,7 +13,18 @@
      ./setup.sh
      ```
 
-4. **Access the Application**:
+4. **Start the Server**:
+   - Navigate to the `/server` directory and run:
+     - On Linux:
+       ```bash
+       npm start -- -b
+       ```
+     - On Windows:
+       ```bash
+       npm start -- -- -b
+       ```
+
+5. **Access the Application**:
    - Open your browser and navigate to `http://localhost`.
 
 ### Manual Setup (Optional)
@@ -33,7 +44,7 @@ If you prefer to set up the project manually, follow these steps:
 2. **Configure Environment Variables**:
    - In the `/server` directory, create a `.env` file with the following content:
      ```
-     DATABASE_URL=file:./dev.db
+     DATABASE_URL=file:./dev.db?socket_timeout=10
      LISTEN_PORT=3000
      GPT_API_KEY=<your_openai_api_key>
      WEB_IP=http://localhost
@@ -56,10 +67,15 @@ If you prefer to set up the project manually, follow these steps:
      ```
 
 5. **Start the Server**:
-   - In the `/server` directory, run:
-     ```bash
-     npm start
-     ```
+   - Navigate to the `/server` directory and run:
+     - On Linux:
+       ```bash
+       npm start -- -b
+       ```
+     - On Windows:
+       ```bash
+       npm start -- -- -b
+       ```
 
 6. **Access the Application**:
    - Open your browser and navigate to `http://localhost`.
