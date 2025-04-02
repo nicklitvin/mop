@@ -2,6 +2,7 @@
 
 1. **Install Prerequisites**:
    - Install [Node.js](https://nodejs.org/).
+   - Optional [SQLite DB view](https://sqlitebrowser.org/dl/)
 
 2. **Update Environment Variables**:
    - Before running the setup script, update the following values in the `setup.sh` script:

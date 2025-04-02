@@ -182,15 +182,13 @@ export function MOPPage() {
                     <Table className="w-full">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-11/12">Item</TableHead>
-                                <TableHead className="w-1/12">Initials</TableHead>
+                                <TableHead className="w-full">Item</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {mopData.prerequisites.map((prerequisite, index) => (
                                 <TableRow key={index}>
-                                    <TableCell className="w-11/12 whitespace-normal">{prerequisite}</TableCell>
-                                    <TableCell className="w-1/12"></TableCell>
+                                    <TableCell className="w-full whitespace-normal">{prerequisite}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -204,16 +202,14 @@ export function MOPPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-1/12">Step #</TableHead>
-                                <TableHead className="w-5/6">Action</TableHead>
-                                <TableHead className="w-1/12">Initials</TableHead>
+                                <TableHead className="w-11/12">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {mopData.steps.map((step: Step, index) => (
                                 <TableRow key={step.id}>
                                     <TableCell className="w-1/12">{index + 1}</TableCell>
-                                    <TableCell className="w-5/6 whitespace-normal">{step.action}</TableCell>
-                                    <TableCell className="w-1/12"></TableCell>
+                                    <TableCell className="w-11/12 whitespace-normal">{step.action}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

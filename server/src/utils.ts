@@ -30,13 +30,11 @@ export async function validateSteps(
     gpt: GPT,
     db: DB
 ): Promise<Array<{ action: string }>> {
-    const validationPrompt = `
+    const baseValidationPrompt = `
         You are validating a list of steps for a Methods of Procedure (MOP) in data center operations.
-        The steps are as follows:
-        ${steps.map((step, index) => `${index + 1}. ${step.action}`).join("\n")}
 
         Validate the following:
-        - Ensure each step is specific to a single action or physical item.
+        - Ensure each step is one simple, concise, atomic action specific to a single task or physical item.
         - Ensure the steps are in a logical order.
         - Identify and remove any duplicate, unnecessary, or missing steps.
         - Adjust the steps to make them clear, concise, and specific. For example:
@@ -58,8 +56,10 @@ export async function validateSteps(
             ...
         ]
     `;
-    const savedPrompt = await db.savePrompt("validation", validationPrompt); // Assume savePrompt is always defined
-    const response = await gpt.generateResponse(savedPrompt.content);
+    const stepsText = steps.map((step, index) => `${index + 1}. ${step.action}`).join("\n");
+    const basePrompt = await db.savePrompt("validation", baseValidationPrompt); // Save the full prompt including steps
+    const fullPrompt = `${basePrompt.content}\nThe steps are as follows:\n${stepsText}`;
+    const response = await gpt.generateResponse(fullPrompt); // Use the full prompt from the saved version
     if (!response) {
         throw new Error("Failed to validate steps using GPT.");
     }
@@ -111,7 +111,7 @@ export async function generateDetailedSteps(
             Create detailed steps for the MOP titled "${generalData.title}" described as: "${generalData.description}".
             Section: "${section}".
             Each step must:
-            - Be specific to the actual task (e.g., "Plug cable X into port Y on switch Z").
+            - Be one simple, concise, atomic action specific to the actual task (e.g., "Plug cable X into port Y on switch Z").
             - Avoid vague instructions.
             - Mention tools or equipment in square brackets (e.g., "[screwdriver]", "[network cable]"), but ignore generic items like "pen" or "paper".
             - Ensure compliance with security and industry standards.
@@ -122,7 +122,7 @@ export async function generateDetailedSteps(
                 ...
             ]
         `;
-        const savedPrompt = await db.savePrompt("detailedSteps", sectionPrompt); // Assume savePrompt is always defined
+        const savedPrompt = await db.savePrompt("detailedSteps", sectionPrompt); 
         const sectionResponse = await gpt.generateResponse(savedPrompt.content);
         if (!sectionResponse) {
             throw new Error(`Failed to generate steps for section: ${section}`);
@@ -165,7 +165,7 @@ export async function generateUpdatedPrompt(
         User feedback:
         "${comment}"
 
-        Return the updated prompt as plain text with no additional text or markers.
+        Return the updated prompt as plain text with no additional text or markers. Under no circumstances should the output format specified in the original prompt be modified.
     `;
     return await gpt.generateResponse(feedbackPrompt);
 }
@@ -180,7 +180,7 @@ export async function generateMOPChanges(
         The current MOP is as follows:
         Title: "${existingMOP.title}"
         Description: "${existingMOP.description}"
-        Prerequisites: "${existingMOP.prerequisites}" // Items are separated by '|'
+        Prerequisites: "${existingMOP.prerequisites.join('|')}" // Prerequisites and items in oldValue are separated by '|'
         Steps:
         ${existingMOP.steps.map((step: any) => `${step.stepNumber}. ${step.action}`).join("\n")}
 
@@ -191,14 +191,14 @@ export async function generateMOPChanges(
         For each change, specify:
         - The field being updated. The field must be one of the following types: "title", "description", "prerequisites", or "steps".
         - The old value of the field. If the field is "prerequisites", the old value must be a single string with items separated by '|'.
-        - The new value for the field. If the field is "prerequisites", the new value must also be a single string with items separated by '|'. The step number must not be included in the new value string.
+        - The new value for the field. If the field is "prerequisites", the new value must also be a single string with items separated by '|'. The step number must not be included in the new value and old value string so instead of "5. do action 5" instead write "do action 5".
         - If the change is for a specific step, include the step number. Otherwise, do not include the step number.
 
         Ensure the "field" value strictly matches one of the valid types defined above.
 
         Return the changes as a JSON array in the following format:
         [
-            { "field": "string", "oldValue": "string", "newValue": "string", "stepNumber": number|undefined },
+            { "field": "string", "oldValue": "string", "newValue": "string", "stepNumber": number|"undefined" },
             ...
         ]
     `;
@@ -206,5 +206,12 @@ export async function generateMOPChanges(
     if (!response) {
         throw new Error("Failed to generate MOP changes using GPT.");
     }
-    return JSON.parse(response) as { field: ChangeType; oldValue: string; newValue: string; stepNumber?: number }[];
+    const parsed = JSON.parse(response) as { field: ChangeType; oldValue: string; newValue: string; stepNumber?: number|"undefined" }[];
+    return parsed.map(change => {
+        if (change.stepNumber === "undefined") {
+            const { stepNumber, ...rest } = change;
+            return rest;
+        }
+        return change;
+    });
 }

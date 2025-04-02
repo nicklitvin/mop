@@ -188,13 +188,11 @@ export class DB {
                 // Handle prerequisites changes
                 downgradedMOP.prerequisites = change.oldValue.split("|"); // Convert oldValue to string[]
             } else if (change.stepNumber !== null && change.stepNumber !== undefined) {
-                console.log('==',change);
                 // Handle step-specific changes
                 const step = downgradedMOP.steps.find((s) => s.stepNumber === change.stepNumber);
                 if (step) {
                     step.action = change.oldValue;
                 }
-                console.log(downgradedMOP.steps[0]);
             } else {
                 // Handle MOP-level changes
                 (downgradedMOP as any)[change.field] = change.oldValue; // Use type assertion for dynamic key assignment
@@ -209,5 +207,12 @@ export class DB {
             where: { mopId },
             orderBy: { targetVersion: "asc" }, // Order changes by version
         });
+    }
+
+    async resetDatabase() {
+        await this.prisma.change.deleteMany({});
+        await this.prisma.step.deleteMany({});
+        await this.prisma.mOP.deleteMany({});
+        await this.prisma.prompt.deleteMany({});
     }
 }
