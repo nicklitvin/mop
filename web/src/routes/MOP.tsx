@@ -274,7 +274,7 @@ export function MOPPage() {
                         value={updatedMOP}
                         onChange={(e) => setUpdatedMOP(e.target.value)}
                         className="w-full"
-                        placeholder="Enter updated MOP content here..."
+                        placeholder="How would you like to update this MOP?"
                     />
                     <Button onClick={handleMOPUpdate} disabled={loadingButton === "updateMOP"} className="w-36">
                         {loadingButton === "updateMOP" ? <LoadingSpinner /> : "Update MOP"}
@@ -288,7 +288,7 @@ export function MOPPage() {
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         className="w-full"
-                        placeholder="Enter your feedback here..."
+                        placeholder="How would you like future MOPs to be improved?"
                     />
                     <Button onClick={handleSubmit} disabled={loadingButton === "submit"} className="w-36">
                         {loadingButton === "submit" ? <LoadingSpinner /> : "Submit"}
