@@ -6,16 +6,12 @@ cd web && npm install && cd ../server && npm install
 
 # Configure environment variables
 echo "Setting up environment variables..."
-cat <<EOT > server/.env
-DATABASE_URL=file:./dev.db?socket_timeout=10
-LISTEN_PORT=3000
-GPT_API_KEY=<your_openai_api_key>
-WEB_IP=http://localhost
-EOT
+echo "DATABASE_URL=file:./dev.db?socket_timeout=10" > server/.env
+echo "LISTEN_PORT=3000" >> server/.env
+echo "GPT_API_KEY=<your_openai_api_key>" >> server/.env
+echo "WEB_IP=http://localhost" >> server/.env
 
-cat <<EOT > web/.env
-VITE_API_URL="http://localhost:80/api"
-EOT
+echo "VITE_API_URL=\"http://localhost:80/api\"" > web/.env
 
 # Run database migrations
 echo "Running database migrations..."
