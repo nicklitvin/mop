@@ -17,7 +17,7 @@
    - Navigate to the `/server` directory and run:
      - On Linux:
        ```bash
-       npm start -- -b
+       sudo npm start -- -b
        ```
      - On Windows:
        ```bash
