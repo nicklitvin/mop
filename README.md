@@ -2,7 +2,6 @@
 
 1. **Install Prerequisites**:
    - Install [Node.js](https://nodejs.org/).
-   - Optional [SQLite DB view](https://sqlitebrowser.org/dl/)
 
 2. **Update Environment Variables**:
    - Before running the setup script, update the following values in the `setup.sh` script:
@@ -46,7 +45,7 @@ If you prefer to set up the project manually, follow these steps:
    - In the `/server` directory, create a `.env` file with the following content:
      ```
      DATABASE_URL=file:./dev.db?socket_timeout=10
-     LISTEN_PORT=3000
+     LISTEN_PORT=80
      GPT_API_KEY=<your_openai_api_key>
      WEB_IP=http://localhost
      ```

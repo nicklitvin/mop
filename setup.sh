@@ -2,13 +2,13 @@
 
 # Install dependencies
 echo "Installing dependencies..."
-cd web && npm install && cd ../server && npm install
+cd web && npm install && cd ../server && npm install && cd ..
 
 # Configure environment variables
 echo "Setting up environment variables..."
 touch server/.env
 echo "DATABASE_URL=file:./dev.db?socket_timeout=10" > server/.env
-echo "LISTEN_PORT=3000" >> server/.env
+echo "LISTEN_PORT=80" >> server/.env
 echo "GPT_API_KEY=<your_openai_api_key>" >> server/.env
 echo "WEB_IP=http://localhost" >> server/.env
 
@@ -24,6 +24,7 @@ echo "Building the web application..."
 cd ../web && npm run build
 
 # Final instructions
-echo "Setup complete. To start the server, run the following command:"
-echo "On Linux: npm start -- -b"
-echo "On Windows: npm start -- -- -b"
+echo "Setup complete. To start the server, run the following commands:"
+echo "cd server"
+echo "On Linux: sudo npm start -- -b"
+echo "On Windows: sudo npm start -- -- -b"
