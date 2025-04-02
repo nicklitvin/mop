@@ -149,6 +149,38 @@ export function MOPPage() {
             if (response) {
                 toast("MOP updated successfully!");
                 setUpdatedMOP(""); // Clear input box
+
+                // Refetch MOP and changes
+                const fetchMOP = async () => {
+                    if (mopId) {
+                        const id = parseInt(mopId, 10);
+                        if (!isNaN(id)) {
+                            const payload = { id };
+                            const data = await callAPI<MOP>({
+                                method: "GET",
+                                url: "/getMOP",
+                                payload,
+                            });
+                            setMopData(data);
+                        }
+                    }
+                };
+
+                const fetchChanges = async () => {
+                    if (mopId) {
+                        const id = parseInt(mopId, 10);
+                        if (!isNaN(id)) {
+                            const data = await callAPI<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[] | null>({
+                                method: "GET",
+                                url: "/getMOPChanges",
+                                payload: { id },
+                            });
+                            setChanges(data || []);
+                        }
+                    }
+                };
+
+                await Promise.all([fetchMOP(), fetchChanges()]);
             }
         } finally {
             setLoadingButton(null); // Reset loading state
