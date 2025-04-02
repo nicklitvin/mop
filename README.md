@@ -1,7 +1,7 @@
 ### Setup
 
 1. **Install Prerequisites**:
-   - Install [Node.js](https://nodejs.org/).
+   - Install [Node.js and NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or `sudo apt install node; sudo apt install npm` 
 
 2. **Update Environment Variables**:
    - Before running the setup script, update the following values in the `setup.sh` script:
@@ -17,7 +17,7 @@
    - Navigate to the `/server` directory and run:
      - On Linux:
        ```bash
-       npm start -- -b
+       sudo npm start -- -b
        ```
      - On Windows:
        ```bash
