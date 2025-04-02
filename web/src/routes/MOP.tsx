@@ -42,12 +42,12 @@ export function MOPPage() {
             if (mopId) {
                 const id = parseInt(mopId, 10);
                 if (!isNaN(id)) {
-                    const data = await callAPI<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[]>({
+                    const data = await callAPI<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[] | null>({
                         method: "GET",
                         url: "/getMOPChanges",
                         payload: { id },
                     });
-                    setChanges(data);
+                    setChanges(data || []); // Set changes to an empty array if no data is returned
                 }
             }
         };
@@ -198,9 +198,9 @@ export function MOPPage() {
                 </div>
 
                 {/* Changes Table */}
-                {groupedChanges && Object.keys(groupedChanges).length > 0 && (
-                    <div className="space-y-2 border border-gray-300 rounded-lg p-4">
-                        <h2 className="font-bold text-lg">Change History</h2>
+                <div className="space-y-2 border border-gray-300 rounded-lg p-4">
+                    <h2 className="font-bold text-lg">Change History</h2>
+                    {groupedChanges && Object.keys(groupedChanges).length > 0 ? (
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
@@ -223,8 +223,10 @@ export function MOPPage() {
                                 ))}
                             </TableBody>
                         </Table>
-                    </div>
-                )}
+                    ) : (
+                        <p className="text-gray-500">There have been no changes for this MOP.</p>
+                    )}
+                </div>
 
                 {/* Select Version */}
                 <div className="space-y-2 border border-gray-300 rounded-lg p-4">

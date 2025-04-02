@@ -93,6 +93,14 @@ export class DB {
         targetVersion: number,
         stepNumber?: number // Added stepNumber
     ) {
+        console.log({
+            mopId,
+            field,
+            oldValue,
+            newValue,
+            targetVersion,
+            stepNumber
+        })
         return await this.prisma.change.create({
             data: {
                 mopId,
@@ -100,7 +108,7 @@ export class DB {
                 oldValue,
                 newValue,
                 targetVersion,
-                stepNumber, // Save stepNumber if provided
+                // stepNumber, // Save stepNumber if provided
             },
         });
     }
@@ -174,16 +182,13 @@ export class DB {
         });
 
         // Apply changes in reverse order until the target version is reached
-        let currentVersion = mop.version;
         const downgradedMOP = {
             ...mop,
             steps: mop.steps.map((step) => ({ ...step })), // Deep copy steps to avoid mutating the original
         };
 
         for (const change of changes) {
-            if (currentVersion <= targetVersion) {
-                break;
-            }
+            // console.log(change, downgradedMOP.prerequisites);
 
             if (change.targetVersion <= targetVersion) {
                 break; // Stop applying changes when targetVersion matches
@@ -202,8 +207,6 @@ export class DB {
                 // Handle MOP-level changes
                 (downgradedMOP as any)[change.field] = change.oldValue; // Use type assertion for dynamic key assignment
             }
-
-            currentVersion--; // Decrement the version after applying a change
         }
 
         return { ...downgradedMOP, version: targetVersion }; // Ensure the returned MOP reflects the requested version

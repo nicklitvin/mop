@@ -32,7 +32,6 @@ export const callAPI = async <T>({ method, url, payload } : {
 
         return output.data ?? null;
     } catch (err) {
-        console.log(err);
         if (axios.isAxiosError(err) && err.response?.data?.message) {
             toast(err.response.data.message); // Show the error message from the response
         } else {

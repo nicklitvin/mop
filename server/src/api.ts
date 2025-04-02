@@ -1,4 +1,4 @@
-import { APIOutput, MOPInput, PromptType, OutputMOP } from "./types";
+import { APIOutput, MOPInput, PromptType, OutputMOP, ChangeType } from "./types";
 import { DB } from "./db";
 import { MOP } from "@prisma/client";
 import { GPT } from "./gpt";
@@ -122,25 +122,25 @@ export class API {
 
         // Step 2: Generate updates using the utility function
         const updates = await generateMOPChanges(this.gpt, existingMOP, prompt);
+        // const updates = [
+        //     {
+        //         field: 'prerequisites' as ChangeType,
+        //         oldValue: 'NEW NETWORK SWITCHES,SCREWDRIVER,NETWORK CABLES,PATCH PANELS,CABLE TIES,LABELING TOOLS,BACKUP CONFIGURATION SOFTWARE,ACCESS TO MANAGEMENT INTERFACES',
+        //         newValue: 'TEST'
+        //     },
+        //     {
+        //         field: "steps" as ChangeType,
+        //         oldValue: "OLD VALUE",
+        //         newValue: "NEW VALUE",
+        //         stepNumber: 1 // Specify the step number for the update
+        //     }
+        // ]
         if (!updates || updates.length === 0) {
             return { message: "No updates generated for the MOP" };
         }
 
-        const newVersion = existingMOP.version + 1; // Calculate the new version
-
-        // Apply updates and save changes
-        for (const update of updates) {
-            await this.db.saveChange(
-                id,
-                update.field,
-                update.oldValue,
-                update.newValue,
-                newVersion,
-                update.stepNumber // Pass stepNumber if available
-            );
-        }
-
-        await this.db.updateMOP(id, updates);
+        // Step 3: Save the changes to the database
+        await this.db.updateMOP(id, updates)
 
         // Step 4: Fetch the updated MOP
         const updatedMOP = await this.db.getMOP(id);
@@ -154,7 +154,7 @@ export class API {
     async getMOPChanges(id: number): Promise<APIOutput<{ version: number; field: string; oldValue: string; newValue: string; stepNumber?: number }[]>> {
         const changes = await this.db.getMOPChanges(id);
         if (!changes || changes.length === 0) {
-            return { message: "No changes found for the specified MOP ID" };
+            return { data: [] };
         }
 
         // Map database result to expected output format
