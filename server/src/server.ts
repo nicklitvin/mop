@@ -29,13 +29,6 @@ export class Server {
             })
         );
 
-        if (useBuild) {
-            app.use(express.static(path.join(__dirname, "../../web/dist")));
-            app.get("*", (req, res) => {
-                res.sendFile(path.join(__dirname, "../../web/dist"));
-            });
-        }
-
         app.get(this.URLS.hi, this.hi.bind(this));
         app.post(this.URLS.createMOP, this.createMOP.bind(this)); // Updated URL usage
         app.get(this.URLS.getMOP, this.getMOP.bind(this)); // Add new endpoint
@@ -44,6 +37,13 @@ export class Server {
         app.post(this.URLS.updateMOP, this.updateMOP.bind(this)); // Add new endpoint
         app.get(this.URLS.getMOPVersion, this.getMOPVersion.bind(this)); // Add new endpoint
         app.get(this.URLS.getMOPChanges, this.getMOPChanges.bind(this)); // Add new endpoint
+
+        if (useBuild) {
+            app.use(express.static(path.join(__dirname, "../../web/dist")));
+            app.get("*", (req, res) => {
+                res.sendFile(path.join(__dirname, "../../web/dist/index.html"));
+            });
+        }
     }
 
     async hi(req: Request, res: Response) {
